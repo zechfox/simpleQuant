@@ -5,6 +5,9 @@ Created on Mon Nov  2 21:34:04 2015
 @author: zech
 """
 import numpy as np
+import logging
+
+MyLogger = logging.getLogger(__name__)   
 
 class SimpleQuantDataTweak:
     def __init__(self):

@@ -6,6 +6,9 @@ Created on Fri Oct 30 20:38:19 2015
 """
 import urllib
 import json
+import logging
+
+MyLogger = logging.getLogger(__name__)   
 
 def removeDuplicated(seq):
     seen = set()
@@ -38,7 +41,6 @@ class SimpleQuantUIDataManager:
         
         hqEntries = self.getAnother80StockData(startDate)
         appendStockData = self.stock_data + hqEntries
-        print(appendStockData)
         return appendStockData
 
     def getAnother80StockData(self, startDate):
@@ -70,7 +72,7 @@ class SimpleQuantUIDataManager:
         #unzip rough_data, then zip them as list of tuple
         (self.date, self.open, self.close, self.change, self.chg_percent, self.low,
          self.high, self.volume, self.turnover, self.tunrover_rate) = zip(*(roughData[::-1]))
-        print("setBasicData....Done!")
+        MyLogger.info("setBasicData....Done!")
          
     def initialHistoryWindow(self, windowsSize):
         self.history_windows_size = windowsSize
@@ -83,7 +85,7 @@ class SimpleQuantUIDataManager:
         
     def prepareHistoryData(self):
         self.setBasicData(self.getAppendStockData(self.end_date))
-        print("prepare history data....Done!")
+        MyLogger.info("prepare history data....Done!")
         
     def getLowPrice(self):
         return self.low[self.history_windows_size + self.history_data_start_index]

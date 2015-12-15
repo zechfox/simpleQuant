@@ -10,11 +10,13 @@ import pkgutil
 import inspect
 import strategy
 from simpleQuantStrategy import SimpleQuantStrategyBase
+import logging
 
+MyLogger = logging.getLogger(__name__)   
 class SimpleQuantStrategyManager:
     def __init__(self):
         self.strategy_name_list = [modname for importer, modname, ispkg in pkgutil.iter_modules(strategy.__path__)]
-        self.setStrategyName(self.strategy_name_list[0])
+        self.setStrategyName(self.strategy_name_list[0])  
     
     def getStrategyInstance(self): 
         # load the module, will raise ImportError if module cannot be loaded 
@@ -24,6 +26,7 @@ class SimpleQuantStrategyManager:
                 return obj
         
     def setStrategyName(self, strategyName):
+        MyLogger.info("set strategy name")
         self.strategy_name = strategyName
         
     def getStrategyNameList(self):

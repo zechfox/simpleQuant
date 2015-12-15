@@ -5,7 +5,9 @@ Created on Tue Nov  3 21:30:02 2015
 @author: zech
 """
 from simpleQuantDataTweak import SimpleQuantDataTweak
+import logging
 
+MyLogger = logging.getLogger(__name__)   
 class SimpleQuantStrategyBase:
     def __init__(self, dataManager):
         self.name = "strategyBase"
@@ -14,7 +16,7 @@ class SimpleQuantStrategyBase:
         self.history_data_size = 80
         
     def backTest(self):
-        print("run back test, please wait")
+        MyLogger.info("run back test, please wait")
         self.prepare();
         #loop for run()
         for index in range(self.backtest_windows_size):
@@ -22,7 +24,7 @@ class SimpleQuantStrategyBase:
             self.run()
             self.profits.append(self.calculateCurrentProfit())
             
-        print("Done!") 
+        MyLogger.info("Done!") 
         
         self.stop()
         

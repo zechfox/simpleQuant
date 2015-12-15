@@ -4,6 +4,7 @@ Created on Thu Oct 29 20:57:03 2015
 
 @author: zech
 """
+import sys
 from PyQt4 import QtGui, QtCore
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -11,9 +12,14 @@ from simpleQuantDataManager import SimpleQuantUIDataManager
 #from simpleQuantStrategy import SimpleQuantStrategyBase
 from simpleQuantStrategyManager import SimpleQuantStrategyManager
 import datetime
+from multiprocessing import Process
 from matplotlib.dates import DateFormatter
-    
-class SimpleQuantUIStaticMplCanvas(FigureCanvas):
+import logging
+from logging.handlers import SocketHandler, DEFAULT_TCP_LOGGING_PORT
+
+MyLogger = logging.getLogger(__name__)
+
+class SimpleQuantUIStrategyMplCanvas(FigureCanvas):
     def __init__(self, hq_data = 0):
         self.fig = Figure(figsize=(5, 3), dpi=100)
         self.axes = self.fig.add_subplot(111)
@@ -39,35 +45,6 @@ class SimpleQuantUIStaticMplCanvas(FigureCanvas):
         dates = [datetime.datetime.strptime(entry[0],"%Y-%m-%d") for entry in hq_data]
         opens = [entry[1] for entry in hq_data]
         self.axes.plot(dates, opens, 'r')
-        self.fig.autofmt_xdate()
-        
-        
-class SimpleQuantUIStrategyMplCanvas(FigureCanvas):
-    def __init__(self):
-        self.fig = Figure(figsize=(5, 3), dpi=100)
-        self.axes = self.fig.add_subplot(111)
-        #the axes cleared every time plot() is called
-        self.axes.hold(False)
-        daysFmt  = DateFormatter('%Y-%m-%d')
-        self.axes.xaxis.set_major_formatter(daysFmt)
-        self.axes.autoscale_view()
-        # format the coords message box  
-        def price(x): return '$%1.2f'%x
-        self.axes.fmt_xdata = DateFormatter('%Y-%m-%d')
-        self.axes.fmt_ydata = price
-        self.axes.grid(True)
-        self.fig.autofmt_xdate()
-        #
-        FigureCanvas.__init__(self, self.fig)
-        FigureCanvas.setSizePolicy(self,
-                                   QtGui.QSizePolicy.Expanding,
-                                   QtGui.QSizePolicy.Expanding)
-        FigureCanvas.updateGeometry(self)
-
-    def updateFigure(self, profits_data):
-        dates = [datetime.datetime.strptime(entry[0],"%Y-%m-%d") for entry in profits_data]
-        profits = [entry[1] for entry in profits_data]
-        self.axes.plot(dates, profits, 'r')
         self.fig.autofmt_xdate()
         
         
@@ -100,7 +77,7 @@ class SimpleQuantUITransitionDialog(QtGui.QDialog):
         self.stock_widget_layout.addWidget(endDateLabel)
         self.stock_widget_layout.addWidget(self.end_date)
         hqData = self.data_manager.getStockData()
-        self.stock_canvas = SimpleQuantUIStaticMplCanvas(hqData)
+        self.stock_canvas = SimpleQuantUIStrategyMplCanvas(hqData)
         self.stock_layout.addStretch(1)
         self.stock_layout.addWidget(self.stock_canvas)
         self.stock_layout.addLayout(self.stock_widget_layout)
@@ -112,7 +89,9 @@ class SimpleQuantUITransitionDialog(QtGui.QDialog):
         self.strategy_combobox = QtGui.QComboBox()
         self.strategy_combobox.activated[str].connect(self.strategyChanged)
         [self.strategy_combobox.addItem(strategyName) for strategyName in self.strategy_manager.getStrategyNameList()]
-        self.strategy_canvas = SimpleQuantUIStrategyMplCanvas()
+        for entry in hqData:
+            entry[1] = '0'
+        self.strategy_canvas = SimpleQuantUIStrategyMplCanvas(hqData)
         self.strategy_layout.addStretch(1)
         self.strategy_layout.addWidget(self.strategy_canvas)
         self.strategy_layout.addWidget(self.strategy_button)
@@ -134,12 +113,21 @@ class SimpleQuantUITransitionDialog(QtGui.QDialog):
         profitsData = self.stock_strategy.backTest()
         self.strategy_canvas.updateFigure(profitsData)
         self.strategy_canvas.draw()
-        print("Done!")
+        MyLogger.info("Done!")
         
     def strategyChanged(self, strategyName):
         self.strategy_manager.setStrategyName(strategyName)
         
-
+def simple_quant_transition(stockIndex):
+    qApp = QtGui.QApplication(sys.argv)
+    rootlogger = logging.getLogger('')
+    rootlogger.setLevel(logging.DEBUG)
+    socketh = SocketHandler('localhost', DEFAULT_TCP_LOGGING_PORT)
+    rootlogger.addHandler(socketh)
+    MyLogger.info("simple_quant_transition start!")
+    transition_dialog = SimpleQuantUITransitionDialog(stockIndex)
+    transition_dialog.show()
+    qApp.exec()
         
 class SimpleQuantUIMainWindow(QtGui.QMainWindow):
     def __init__(self):
@@ -170,11 +158,16 @@ class SimpleQuantUIMainWindow(QtGui.QMainWindow):
         
         self.main_widget.setFocus()
         self.setCentralWidget(self.main_widget)
+        
+        self.transitionJobs = []
+        MyLogger.info("simple quant UI start!")
 
+        
     def quaryButtonClicked(self):
-        stockSymbol = self.quaryText.text()
-        self.transitionUI = SimpleQuantUITransitionDialog(stockSymbol)
-        self.transitionUI.show()
+        stock_index = self.quaryText.text()
+        transition_process = Process(target=simple_quant_transition, args=(stock_index,))
+        self.transitionJobs.append(transition_process)   
+        transition_process.start()
         
     def fileQuit(self):
         self.close()
@@ -183,13 +176,4 @@ class SimpleQuantUIMainWindow(QtGui.QMainWindow):
         self.fileQuit()
 
     def about(self):
-        QtGui.QMessageBox.about(self, "About",
-"""embedding_in_qt4.py example
-Copyright 2005 Florent Rougon, 2006 Darren Dale
-
-This program is a simple example of a Qt4 application embedding matplotlib
-canvases.
-
-It may be used and modified with no restriction; raw copies as well as
-modified versions may be distributed without limitation."""
-)
+        QtGui.QMessageBox.about(self, "About",)
