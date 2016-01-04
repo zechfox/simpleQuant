@@ -7,6 +7,7 @@ Created on Fri Oct 30 20:38:19 2015
 import urllib
 import json
 import logging
+import re
 
 MyLogger = logging.getLogger(__name__)   
 
@@ -14,6 +15,9 @@ def removeDuplicated(seq):
     seen = set()
     seen_add = seen.add
     return [ x for x in seq if not (x in seen or seen_add(x))]
+
+def _code_to_symbol(code):
+    return 'sh%s'%code if code[:1] in ['5', '6'] else 'sz%s'%code
     
 class SimpleQuantUIDataManager:
         
@@ -22,6 +26,13 @@ class SimpleQuantUIDataManager:
         self.start_date = startDate
         self.end_date   = endDate
         self.updateStockData(startDate, endDate)
+        #it's not a hard real time,
+        #it's ok use list as data container,
+        #all the process would be finished in timer event
+        #and the design also availabe for hangqing API later,  
+        #due to hangqing API is still not hard real time, 
+        #the period will be 3sec at least
+        self.realtime_data = [0]
         
     def getStockData(self):
         return self.stock_data
@@ -93,3 +104,35 @@ class SimpleQuantUIDataManager:
     def getHighPrice(self):
         return self.high[self.history_windows_size + self.history_data_start_index]
         
+    #called by online timer handler of transition
+    def retreiveRealTimeQuotes(self):
+        MyLogger.info("retreive real time quotes")
+        stockSymbol = _code_to_symbol(self.stock_symbol)
+        url = ('http://hq.sinajs.cn/list=' + stockSymbol)
+        req = urllib.request.Request(url)
+        with urllib.request.urlopen(req) as response:        
+            roughData = response.read().decode('GBK')
+        reg = re.compile(r'\="(.*?)\";')
+        data = reg.findall(roughData)
+        regSym = re.compile(r'(?:sh|sz)(.*?)\=')
+        syms = regSym.findall(roughData)
+        data_list = []
+        syms_list = []
+        for index, row in enumerate(data):
+            if len(row)>1:
+                data_list.append([astr for astr in row.split(',')])
+                syms_list.append(syms[index])
+
+        #only support 1 symbol now
+        if self.realtime_data[-1] != data_list:
+            self.realtime_data.append(data_list)
+        
+    def getLatestRealTimeQuotes(self, numbers):
+        #return null if no enough data
+        MyLogger.info("get latest %d real time quotes", numbers)
+        dataLength = len(self.realtime_data)
+        if dataLength > numbers:
+            return self.realtime_data[(dataLength - numbers):-1]
+        else:
+            return []
+                

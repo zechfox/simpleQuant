@@ -9,6 +9,7 @@ from PyQt4 import QtGui, QtCore
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from simpleQuantDataManager import SimpleQuantUIDataManager
+from simpleQuantEventEngine import *
 #from simpleQuantStrategy import SimpleQuantStrategyBase
 from simpleQuantStrategyManager import SimpleQuantStrategyManager
 import datetime
@@ -56,6 +57,7 @@ class SimpleQuantUITransitionDialog(QtGui.QDialog):
         startDate = endDate.addDays(-60)
         self.strategy_manager = SimpleQuantStrategyManager()
         self.data_manager = SimpleQuantUIDataManager(stockSymbol, startDate, endDate)
+        self.event_engine = SimpleQuantEventEngine()
         #self.stock_strategy = SimpleQuantStrategyMACD(self.data_manager)
         self.setGeometry(100, 100, 850, 650)
         self.main_widget = QtGui.QWidget(self)
@@ -97,8 +99,15 @@ class SimpleQuantUITransitionDialog(QtGui.QDialog):
         self.strategy_layout.addWidget(self.strategy_button)
         self.strategy_layout.addWidget(self.strategy_combobox)
         
+        self.online_radio_button = QtGui.QRadioButton('Online')
+        self.offline_radio_button = QtGui.QRadioButton('Offline')
+        self.online_radio_button.toggled.connect(self.onlineClicked)
+        self.offline_radio_button.toggled.connect(self.offlineClicked)
+        
         self.transition_layout.addLayout(self.stock_layout)
         self.transition_layout.addLayout(self.strategy_layout)
+        self.transition_layout.addWidget(self.online_radio_button)
+        self.transition_layout.addWidget(self.offline_radio_button)
         
     def updateButtonClicked(self):
         endDate = self.end_date.date()
@@ -117,6 +126,19 @@ class SimpleQuantUITransitionDialog(QtGui.QDialog):
         
     def strategyChanged(self, strategyName):
         self.strategy_manager.setStrategyName(strategyName)
+        
+    def onlineClicked(self):
+        self.event_engine.start()
+        self.event_engine.register(EVENT_TIMER, self.timerHandler)
+        
+    def offlineClicked(self):
+        self.event_engine.unregister(EVENT_TIMER, self.timerHandler)
+        self.event_engine.stop()
+        
+    def timerHandler(self, event):
+        self.data_manager.retreiveRealTimeQuotes()
+        
+        
         
 def simple_quant_transition(stockIndex):
     qApp = QtGui.QApplication(sys.argv)
