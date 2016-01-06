@@ -36,4 +36,5 @@ def transition():
     with open('app/static/json/profits.json', 'w') as f:
         f.write(json.dumps(profits))
     
-    return "I'm transition"
+    return render_template("transition.html",
+                           title = 'Trasition')
