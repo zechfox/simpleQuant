@@ -12,7 +12,7 @@ from .forms import MainSearchForm
 from simpleQuantTransition import SimpleQuantTransition
 
 
-@app.route('/')
+@app.route('/', methods=['GET','POST'])
 @app.route('/index', methods=['GET','POST'])
 def index():
     mainSearchForm = MainSearchForm()
