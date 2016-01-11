@@ -56,9 +56,14 @@
               <div id="chart--history-price"></div>
             </div>
             <div class="col-xs-4 col-sm-4  col-md-4 placeholder">
-              <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
-              <h4>Label</h4>
-              <span class="text-muted">i'm 1st</span>
+              <form id="form" action="" method="POST" style="padding: 0; margin:0;" >
+                {{transitionPanelForm.hidden_tag()}}
+                <div class="input-group input-group-lg">
+                  {{transitionPanelForm.startDateField}}
+                  {{transitionPanelForm.endDateField}}
+                  <input type="submit" value="GO!">
+                </div><!-- /input-group -->
+              </form>
             </div>
           </div>
           <!-- strategy result and log layout  -->

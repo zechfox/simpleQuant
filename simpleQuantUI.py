@@ -53,22 +53,29 @@ class SimpleQuantUITransitionDialog(QtGui.QDialog):
     def __init__(self, stockSymbol):
         QtGui.QDialog.__init__(self)
         #today is endDate, startDate is earlier than endDate
-        endDate = QtCore.QDate.currentDate()
-        startDate = endDate.addDays(-60)
+        endDate = datetime.datetime.today()
+        deltaDays = datetime.timedelta(days=-60)
+        startDate = endDate + deltaDays
         self.strategy_manager = SimpleQuantStrategyManager()
         self.data_manager = SimpleQuantUIDataManager(stockSymbol, startDate, endDate)
         self.event_engine = SimpleQuantEventEngine()
         #self.stock_strategy = SimpleQuantStrategyMACD(self.data_manager)
         self.setGeometry(100, 100, 850, 650)
         self.main_widget = QtGui.QWidget(self)
+        
         self.start_date = QtGui.QDateEdit(self)
         self.start_date.setCalendarPopup(True)
-        self.start_date.setDate(startDate)
+        startDateStr = startDate.strftime("%Y-%m-%d")
+        self.start_date.setDate(QDate.fromString(startDateStr, 'yyyy-MM-dd'))
         startDateLabel = QtGui.QLabel('StartDate: ', self)
+        
+        endDateStr = endDate.strftime("%Y-%m-%d")
         self.end_date = QtGui.QDateEdit(self)
         self.end_date.setCalendarPopup(True)
-        self.end_date.setDate(endDate)
+        self.end_date.setDate(QDate.fromString(endDateStr, 'yyyy-MM-dd'))
         endDateLabel = QtGui.QLabel('EndDate: ', self)
+        
+        
         self.update_button = QtGui.QPushButton("Update")
         self.update_button.clicked.connect(self.updateButtonClicked)
         self.transition_layout = QtGui.QVBoxLayout(self.main_widget)
@@ -110,8 +117,8 @@ class SimpleQuantUITransitionDialog(QtGui.QDialog):
         self.transition_layout.addWidget(self.offline_radio_button)
         
     def updateButtonClicked(self):
-        endDate = self.end_date.date()
-        startDate = self.start_date.date()
+        endDate = self.end_date.date().toPyDateTime()
+        startDate = self.start_date.date().toPyDateTime()
         self.data_manager.setStockContext(startDate, endDate)
         stockData = self.data_manager.getStockData()
         self.stock_canvas.updateFigure(stockData)

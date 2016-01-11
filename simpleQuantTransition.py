@@ -4,7 +4,7 @@ Created on Sat Jan  2 16:11:44 2016
 
 @author: zech
 """
-from PyQt4 import QtCore
+import datetime
 
 from simpleQuantDataManager import SimpleQuantUIDataManager
 from simpleQuantEventEngine import SimpleQuantEventEngine
@@ -12,8 +12,9 @@ from simpleQuantStrategyManager import SimpleQuantStrategyManager
 
 class SimpleQuantTransition():
     def __init__(self, stockSymbol):
-        endDate = QtCore.QDate.currentDate()
-        startDate = endDate.addDays(-60)
+        endDate = datetime.datetime.today()
+        deltaDays = datetime.timedelta(days=-60)
+        startDate = endDate + deltaDays
         self.strategy_manager = SimpleQuantStrategyManager()
         self.data_manager = SimpleQuantUIDataManager(stockSymbol, startDate, endDate)
         self.event_engine = SimpleQuantEventEngine()
@@ -31,3 +32,6 @@ class SimpleQuantTransition():
         profitsData = self.stock_strategy.backTest()
         
         return profitsData
+        
+    def updateTransitionContext(self, startDate, endDate):
+        self.data_manager.setStockContext(startDate, endDate)

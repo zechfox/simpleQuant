@@ -4,6 +4,8 @@ Created on Fri Oct 30 20:38:19 2015
 
 @author: zech
 """
+
+import datetime
 import urllib
 import json
 import logging
@@ -48,15 +50,16 @@ class SimpleQuantUIDataManager:
         self.end_date   = endDate
         self.updateStockData(startDate, endDate)
         
-    def getAppendStockData(self, startDate):
-        
-        hqEntries = self.getAnother80StockData(startDate)
+    def getAppendStockData(self):
+        hqEntries = self.getAnother80StockData()
         appendStockData = self.stock_data + hqEntries
         return appendStockData
 
-    def getAnother80StockData(self, startDate):
+    def getAnother80StockData(self):
+        deltaDays = datetime.timedelta(days=-1)
+        startDate = self.start_date + deltaDays
         url = ('http://q.stock.sohu.com/hisHq?code=cn_' +
-               self.stock_symbol + '&start=' + self.start_date.addDays(-1).toString('yyyyMMdd'))
+               self.stock_symbol + '&start=' + startDate.strftime('%Y%m%d'))
         req = urllib.request.Request(url)
         with urllib.request.urlopen(req) as response:        
             json_data = response.read().decode()
@@ -69,7 +72,7 @@ class SimpleQuantUIDataManager:
     
     def updateStockData(self, startDate, endDate):
         url = ('http://q.stock.sohu.com/hisHq?code=cn_' +
-               self.stock_symbol + '&start=' + self.start_date.toString('yyyyMMdd') + '&end=' + self.end_date.toString('yyyyMMdd'))
+               self.stock_symbol + '&start=' + self.start_date.strftime('%Y%m%d') + '&end=' + self.end_date.strftime('%Y%m%d'))
         req = urllib.request.Request(url)
         with urllib.request.urlopen(req) as response:        
             json_data = response.read().decode()
@@ -95,7 +98,7 @@ class SimpleQuantUIDataManager:
         self.history_data_start_index = startIndex
         
     def prepareHistoryData(self):
-        self.setBasicData(self.getAppendStockData(self.end_date))
+        self.setBasicData(self.getAppendStockData())
         MyLogger.info("prepare history data....Done!")
         
     def getLowPrice(self):

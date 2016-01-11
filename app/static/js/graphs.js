@@ -3,55 +3,80 @@ queue()
     .defer(d3.json, "/static/json/hqData.json")
     .await(stockHistoryPriceChart);
 
+$.getJSON(
+    "/static/json/hqData.json",
+    function(data) {
+       var hitslineChart = dc.lineChart("#chart--history-price");
+       //var data = data;
+       var ndx = crossfilter(data);
+       var parseDate = d3.time.format("%Y-%m-%d").parse;
+
+       data.forEach(function(d) {
+	       d.date = parseDate(d[0]);
+	       d.open = d[1];
+           d.close = d[2];
+	   });
+
+       	var dateDim = ndx.dimension(function(d) {
+	        return d.date;
+	    });	
+
+        var open = dateDim.group().reduceSum(function(d) {
+	        return d.open;
+	    });
+        var close = dateDim.group().reduceSum(function(d) {
+	        return d.close;
+	    });
+
+	    var minDate = dateDim.bottom(1)[0].date;
+	    var maxDate = dateDim.top(1)[0].date;
+
+	    hitslineChart
+	      .width(800).height(200)
+	      .dimension(dateDim)
+	      .group(open, "open")
+	      .x(d3.time.scale().domain([minDate, maxDate]))
+	      .yAxisLabel("Price")
+          .title(function(d){ return getvalues(d);}) 
+          .legend(dc.legend().x(50).y(10).itemHeight(13).gap(5))
+	      .brushOn(false);
+
+	    function getvalues(d){
+            return d.key.getFullYear() + "/" + (d.key.getMonth() + 1) + "/" + d.key.getDate() + ": " + d.value;
+        }
+
+        dc.renderAll();
+
+    }
+);
 function stockHistoryPriceChart(error, profits, hqData) {
-    var hitslineChart = dc.lineChart("#chart--history-price");
+  
     var strategyResultChart = dc.lineChart("#chart--strategy-result");
 
-    var data = hqData;
+    
     var profitsData = profits;
-	var ndx = crossfilter(data);
+	
 	var ndxProfits = crossfilter(profitsData);
 	var parseDate = d3.time.format("%Y-%m-%d").parse;
-	data.forEach(function(d) {
-	  d.date = parseDate(d[0]);
-	  d.open = d[1];
-      d.close = d[2];
-	});
+
 
 	profitsData.forEach(function(d) {
 	  d.date = parseDate(d[0]);
 	  d.profits = d[1];
 	});
 
-	var dateDim = ndx.dimension(function(d) {
-	  return d.date;
-	});
+
 
 	var profitsDateDim = ndxProfits.dimension(function(d) {
 	  return d.date;
 	});	
 
-	var open = dateDim.group().reduceSum(function(d) {
-	  return d.open;
-	});
-  var close = dateDim.group().reduceSum(function(d) {
-	  return d.close;
-	});
     var profit = profitsDateDim.group().reduceSum(function(d) {
 	  return d.profits;
 	});
-	var minDate = dateDim.bottom(1)[0].date;
-	var maxDate = dateDim.top(1)[0].date;
+	var minDate = profitsDateDim.bottom(1)[0].date;
+	var maxDate = profitsDateDim.top(1)[0].date;
 
-	hitslineChart
-	  .width(800).height(200)
-	  .dimension(dateDim)
-	  .group(open, "open")
-	  .x(d3.time.scale().domain([minDate, maxDate]))
-	  .yAxisLabel("Price")
-    .title(function(d){ return getvalues(d);}) 
-    .legend(dc.legend().x(50).y(10).itemHeight(13).gap(5))
-	  .brushOn(false);
 
 	strategyResultChart
 	  .width(800).height(200)
