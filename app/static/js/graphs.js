@@ -3,9 +3,11 @@ queue()
     .defer(d3.json, "/static/json/hqData.json")
     .await(stockHistoryPriceChart);
 
-$.getJSON(
-    "/static/json/hqData.json",
-    function(data) {
+$.ajax(
+    cache: false,
+    url: "/static/json/hqData.json",
+    dataType: "json",
+    success: function(data) {
        var hitslineChart = dc.lineChart("#chart--history-price");
        //var data = data;
        var ndx = crossfilter(data);
@@ -19,7 +21,7 @@ $.getJSON(
 
        	var dateDim = ndx.dimension(function(d) {
 	        return d.date;
-	    });	
+	    });
 
         var open = dateDim.group().reduceSum(function(d) {
 	        return d.open;
@@ -37,7 +39,7 @@ $.getJSON(
 	      .group(open, "open")
 	      .x(d3.time.scale().domain([minDate, maxDate]))
 	      .yAxisLabel("Price")
-          .title(function(d){ return getvalues(d);}) 
+          .title(function(d){ return getvalues(d);})
           .legend(dc.legend().x(50).y(10).itemHeight(13).gap(5))
 	      .brushOn(false);
 
@@ -50,12 +52,12 @@ $.getJSON(
     }
 );
 function stockHistoryPriceChart(error, profits, hqData) {
-  
+
     var strategyResultChart = dc.lineChart("#chart--strategy-result");
 
-    
+
     var profitsData = profits;
-	
+
 	var ndxProfits = crossfilter(profitsData);
 	var parseDate = d3.time.format("%Y-%m-%d").parse;
 
@@ -69,7 +71,7 @@ function stockHistoryPriceChart(error, profits, hqData) {
 
 	var profitsDateDim = ndxProfits.dimension(function(d) {
 	  return d.date;
-	});	
+	});
 
     var profit = profitsDateDim.group().reduceSum(function(d) {
 	  return d.profits;
@@ -84,20 +86,20 @@ function stockHistoryPriceChart(error, profits, hqData) {
 	  .group(profit, "Profit")
 	  .x(d3.time.scale().domain([minDate, maxDate]))
 	  .yAxisLabel("Profits")
-    .title(function(d){ return getvalues(d);}) 
+    .title(function(d){ return getvalues(d);})
     .legend(dc.legend().x(50).y(10).itemHeight(13).gap(5))
-	  .brushOn(false);	  
-    
+	  .brushOn(false);
+
 function getvalues(d){
     return d.key.getFullYear() + "/" + (d.key.getMonth() + 1) + "/" + d.key.getDate() + ": " + d.value;
-} 
+}
 
 	dc.renderAll();
 
 
 };
 function makeGraphs(error, projectsJson, statesJson) {
-	
+
 	//Clean projectsJson data
 	var donorschooseProjects = projectsJson;
 	var dateFormat = d3.time.format("%Y-%m-%d");
@@ -119,7 +121,7 @@ function makeGraphs(error, projectsJson, statesJson) {
 
 
 	//Calculate metrics
-	var numProjectsByDate = dateDim.group(); 
+	var numProjectsByDate = dateDim.group();
 	var numProjectsByResourceType = resourceTypeDim.group();
 	var numProjectsByPovertyLevel = povertyLevelDim.group();
 	var totalDonationsByState = stateDim.group().reduceSum(function(d) {

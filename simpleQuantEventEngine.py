@@ -7,7 +7,7 @@ Created on Wed Dec 16 21:16:55 2015
 from queue import Queue, Empty
 from threading import Thread
 import datetime
-from PyQt4.QtCore import QTimer
+#from PyQt4.QtCore import QTimer
 
 from simpleQuantEventType import *
 
