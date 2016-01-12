@@ -1,10 +1,5 @@
-queue()
-    .defer(d3.json, "/static/json/profits.json")
-    .defer(d3.json, "/static/json/hqData.json")
-    .await(stockHistoryPriceChart);
-
-$.ajax(
-    cache: false,
+$.ajax({
+    cache:false,
     url: "/static/json/hqData.json",
     dataType: "json",
     success: function(data) {
@@ -50,13 +45,18 @@ $.ajax(
         dc.renderAll();
 
     }
-);
-function stockHistoryPriceChart(error, profits, hqData) {
+});
+
+$.ajax({
+    cache:false,
+    url: "/static/json/profits.json",
+    dataType: "json",
+    success: function(data) {
 
     var strategyResultChart = dc.lineChart("#chart--strategy-result");
 
 
-    var profitsData = profits;
+    var profitsData = data;
 
 	var ndxProfits = crossfilter(profitsData);
 	var parseDate = d3.time.format("%Y-%m-%d").parse;
@@ -90,14 +90,14 @@ function stockHistoryPriceChart(error, profits, hqData) {
     .legend(dc.legend().x(50).y(10).itemHeight(13).gap(5))
 	  .brushOn(false);
 
-function getvalues(d){
-    return d.key.getFullYear() + "/" + (d.key.getMonth() + 1) + "/" + d.key.getDate() + ": " + d.value;
-}
+    function getvalues(d){
+        return d.key.getFullYear() + "/" + (d.key.getMonth() + 1) + "/" + d.key.getDate() + ": " + d.value;
+    }
 
 	dc.renderAll();
 
-
-};
+    }
+});
 function makeGraphs(error, projectsJson, statesJson) {
 
 	//Clean projectsJson data
