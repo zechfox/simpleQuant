@@ -7,7 +7,7 @@ Created on Wed Dec 16 21:16:55 2015
 from queue import Queue, Empty
 from threading import Thread
 import datetime
-#from PyQt4.QtCore import QTimer
+from PyQt4.QtCore import QTimer
 
 from simpleQuantEventType import *
 
@@ -16,6 +16,19 @@ today930am = todayNow.replace(hour=9, minute=30, second=0, microsecond=0)
 today1130am = todayNow.replace(hour=9, minute=30, second=0, microsecond=0)
 today1pm = todayNow.replace(hour=13, minute=00, second=0, microsecond=0)
 today3pm = todayNow.replace(hour=13, minute=00, second=0, microsecond=0)
+
+class SimpleQuantEventEngineTimerThread(Thread):
+    def __init__(self, event):
+        Thread.__init__(self)
+        self.stopped = event
+        
+    def connect(self, func):
+        self.timeout_function = func
+
+    def run(self):
+        while not self.stopped.wait(0.5):
+            # call a function
+            self.timeout_function()
 
 class SimpleQuantEventEngine:
     """
@@ -67,8 +80,15 @@ class SimpleQuantEventEngine:
         self.__thread = Thread(target = self.__run)
         
         # 计时器，用于触发计时器事件
-        self.__timer = QTimer()
-        self.__timer.timeout.connect(self.__onTimer)
+        #self.__timer = QTimer()
+        #self.__timer.timeout.connect(self.__onTimer)
+
+        stopFlag = Event()
+        self.__timer  = SimpleQuantEventEngineTimerThread(stopFlag)
+        self.__timer.connect(self.__onTimer)
+        
+        # this will stop the timer
+        #stopFlag.set()        
         
         # 这里的__handlers是一个字典，用来保存对应的事件调用关系
         # 其中每个键对应的值是一个列表，列表中保存了对该事件进行监听的函数功能
@@ -118,7 +138,7 @@ class SimpleQuantEventEngine:
         self.__thread.start()
         
         # 启动计时器，计时器事件间隔默认设定为1秒
-        self.__timer.start(1000)
+        self.__timer.start()
     
     #----------------------------------------------------------------------
     def stop(self):
