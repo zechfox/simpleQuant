@@ -18,20 +18,21 @@ class SimpleQuantTransition():
         self.strategy_manager = SimpleQuantStrategyManager()
         self.data_manager = SimpleQuantUIDataManager(stockSymbol, startDate, endDate)
         self.event_engine = SimpleQuantEventEngine()
-    
+
     def getStockData(self):
         hqData = self.data_manager.getStockData()
         return hqData
-    
-    def runStrategy(self):
-        #temp manually
-        strategyName = "simpleQuantStrategyMACD"
+
+    def runStrategy(self, strategyName):
         self.strategy_manager.setStrategyName(strategyName)
-        
+
         self.stock_strategy = self.strategy_manager.getStrategyInstance()(self.data_manager)
         profitsData = self.stock_strategy.backTest()
-        
+
         return profitsData
-        
+
     def updateTransitionContext(self, startDate, endDate):
         self.data_manager.setStockContext(startDate, endDate)
+
+    def getStrategyNameList(self):
+        self.strategy_manager.getStrategyNameList()
