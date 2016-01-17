@@ -54,3 +54,8 @@ def transition():
     return render_template("transition.html",
                            title = 'Trasition',
                            transitionPanelForm = transitionPanelForm)
+                           
+@app.route('/editor', methods=['GET','POST'])
+def editStrategy():
+    return render_template("editor.html",
+                           title = 'StrategyEditor')

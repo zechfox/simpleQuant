@@ -35,4 +35,4 @@ class SimpleQuantTransition():
         self.data_manager.setStockContext(startDate, endDate)
 
     def getStrategyNameList(self):
-        self.strategy_manager.getStrategyNameList()
+        return self.strategy_manager.getStrategyNameList()
