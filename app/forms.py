@@ -7,7 +7,7 @@ Created on Sat Jan  2 10:53:02 2016
 import datetime
 
 from flask_wtf import Form
-from wtforms import StringField, SelectField
+from wtforms import StringField, SelectField, TextField, TextAreaField
 from wtforms.validators import DataRequired
 from wtforms.fields.html5 import DateField
 
@@ -21,3 +21,7 @@ class TransitionPanelForm(Form):
     startDateField = DateField('DatePicker', default=startDate, format='%Y-%m-%d')
     endDateField = DateField('DatePicker', default=endDate, format='%Y-%m-%d')
     strategyListField = SelectField(u'Group')
+
+class StrategyEditorForm(Form):
+    strategyNameField    = TextField(u'StrategyName', validators=[DataRequired()])
+    strategyEditorField = TextAreaField(u'StrategyEditor', validators=[DataRequired()])

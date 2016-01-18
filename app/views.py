@@ -8,7 +8,7 @@ from flask import render_template, flash, redirect, session
 import json
 
 from app import app
-from .forms import MainSearchForm, TransitionPanelForm
+from .forms import MainSearchForm, TransitionPanelForm, StrategyEditorForm
 from simpleQuantTransition import SimpleQuantTransition
 
 
@@ -54,8 +54,12 @@ def transition():
     return render_template("transition.html",
                            title = 'Trasition',
                            transitionPanelForm = transitionPanelForm)
-                           
+
 @app.route('/editor', methods=['GET','POST'])
 def editStrategy():
+    strategyEditorForm = StrategyEditorForm()
+    if strategyEditorForm.validate_on_submit():
+        print("submit OK")
     return render_template("editor.html",
-                           title = 'StrategyEditor')
+                           title = 'StrategyEditor',
+                           strategyEditorForm = strategyEditorForm)
