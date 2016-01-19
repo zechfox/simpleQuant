@@ -1,5 +1,6 @@
 <!-- extend from base layout -->
 {% extends "base.html" %}
+{% import 'macros.html' as macros %}
 {% block content %}
 <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container-fluid">
@@ -50,19 +51,10 @@
     </div>
     <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
       <h1 class="page-header">Strategy</h1>
-      {{strategyEditorForm.hidden_tag()}}
-      <!-- strategy name layout  -->
-      <div class="row">
-        <div class="col-xs-4 col-sm-4">
-          {{strategyEditorForm.strategyNameField}}
-        </div>
-      </div>
-      <!-- strategy editor layout  -->
-      <div class="row">
-        <div class="col-sm-9 col-md-10">
-          {{strategyEditorForm.strategyEditorField}}
-        </div>
-      </div>
+      {% call macros.render_form(strategyEditorForm, action_text='Save Strategy'%}
+        {{ macros.render_field(strategyEditorForm.strategyNameField) }}
+        {{ macros.render_field(strategyEditorForm.strategyEditorField, id='StrategyEditor') }}
+      {% endcall %}
     </div>
   </div>
 </div>
@@ -70,7 +62,7 @@
 <script src="./static/lib/js/codemirror.js" type="text/javascript"></script>
 <script src="./static/lib/js/python.js" type="text/javascript"></script>
 <script>
-  var myTextarea = document.getElementById('strategyEditorField');
+  var myTextarea = document.getElementById('StrategyEditor');
   var editor = CodeMirror.fromTextArea(myTextarea, {
     lineNumbers: true,
     mode: "python"

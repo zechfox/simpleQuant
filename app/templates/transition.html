@@ -1,5 +1,6 @@
 <!-- extend from base layout -->
 {% extends "base.html" %}
+{% import 'macros.html' as macros %}
 {% block content %}
     <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container-fluid">
@@ -56,15 +57,7 @@
               <div id="chart--history-price"></div>
             </div>
             <div class="col-xs-4 col-sm-4  col-md-4 placeholder">
-              <form id="form" action="" method="POST" style="padding: 0; margin:0;" >
-                {{transitionPanelForm.hidden_tag()}}
-                <div class="input-group input-group-lg">
-                  {{transitionPanelForm.startDateField}}
-                  {{transitionPanelForm.endDateField}}
-                  {{transitionPanelForm.strategyListField}}
-                  <input type="submit" value="GO!">
-                </div><!-- /input-group -->
-              </form>
+              {{ macros.render_form(transitionPanelForm, action_text='Run Strategy') }}
             </div>
           </div>
           <!-- strategy result and log layout  -->
