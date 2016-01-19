@@ -18,9 +18,9 @@ class TransitionPanelForm(Form):
     endDate = datetime.datetime.today()
     deltaDays = datetime.timedelta(days=-60)
     startDate = endDate + deltaDays
-    startDateField = DateField('DatePicker', default=startDate, format='%Y-%m-%d')
-    endDateField = DateField('DatePicker', default=endDate, format='%Y-%m-%d')
-    strategyListField = SelectField(u'Group')
+    startDateField = DateField('Start Date', default=startDate, format='%Y-%m-%d')
+    endDateField = DateField('End Date', default=endDate, format='%Y-%m-%d')
+    strategyListField = SelectField(u'Strategy List')
 
 class StrategyEditorForm(Form):
     strategyNameField    = TextField(u'StrategyName', validators=[DataRequired()])

@@ -54,9 +54,14 @@ def transition():
     return render_template("transition.html",
                            title = 'Trasition',
                            transitionPanelForm = transitionPanelForm)
-
-@app.route('/editor', methods=['GET','POST'])
-def editStrategy():
+                           
+@app.route('/manageStrategy', methods=['GET','POST'])
+@app.route('/manageStrategy/<string:page>', methods=['GET','POST'])
+def editStrategy(page = ''):
+    #1. check page is valid or not, if page not empty
+    #2. if page = '' or not valid, list all strategy name
+    #3. if page = valid strategy name, render strategy editor with preload strategy code
+    #4. if page = 'newStrategy', render strategy editor with preload strategy template code
     strategyEditorForm = StrategyEditorForm()
     if strategyEditorForm.validate_on_submit():
         print("submit OK")
