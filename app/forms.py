@@ -25,3 +25,8 @@ class TransitionPanelForm(Form):
 class StrategyEditorForm(Form):
     strategyNameField    = TextField(u'StrategyName', validators=[DataRequired()])
     strategyEditorField = TextAreaField(u'StrategyEditor', validators=[DataRequired()])
+    
+class StrategyHrefName():
+    def __init__(self, name):
+      self.href = '/manageStrategy/' + name
+      self.name = name

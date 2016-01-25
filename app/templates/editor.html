@@ -55,6 +55,13 @@
         {{ macros.render_field(strategyEditorForm.strategyNameField) }}
         {{ macros.render_field(strategyEditorForm.strategyEditorField, id='StrategyEditor') }}
       {% endcall %}
+
+      <!-- list of strategy name -->
+      <ul id="strategyNameList">
+        {% for item in strategyHrefNameList %}
+          <li><a href="{{ item.href }}">{{ item.name }}</a></li>
+        {% endfor %}
+      </ul>
     </div>
   </div>
 </div>

@@ -9,7 +9,10 @@ import json
 
 from app import app
 from .forms import MainSearchForm, TransitionPanelForm, StrategyEditorForm
+from .forms import StrategyHrefName
 from simpleQuantTransition import SimpleQuantTransition
+from simpleQuantStrategyManager import SimpleQuantStrategyManager
+
 
 
 @app.route('/', methods=['GET','POST'])
@@ -63,8 +66,35 @@ def editStrategy(page = ''):
     #3. if page = valid strategy name, render strategy editor with preload strategy code
     #4. if page = 'newStrategy', render strategy editor with preload strategy template code
     strategyEditorForm = StrategyEditorForm()
+    strategyManager = SimpleQuantStrategyManager()
+    strategyNameList = strategyManager.getStrategyNameList()
+    strategyHrefNameList = [StrategyHrefName(name) for name in strategyNameList]
+
     if strategyEditorForm.validate_on_submit():
+        print("submit strategy")        
+            
+
+    elif page == 'newStrategy':
+        print("new Strategy")
+        strategyHrefNameList.clear()
+        return render_template("editor.html",
+                    title = 'StrategyEditor',
+                    strategyEditorForm = strategyEditorForm,
+                    strategyHrefNameList = strategyHrefNameList)
+    elif page in strategyNameList:
+        #render strategy editor with preload strategy code
         print("submit OK")
+        strategyHrefNameList.clear()
+        return render_template("editor.html",
+                    title = 'StrategyEditor',
+                    strategyEditorForm = strategyEditorForm,
+                    strategyHrefNameList = strategyHrefNameList)        
+    else:
+        #page = '' or not in strategy name or not valid
+        #render as /manangeStrategy
+        print("submit NOT OK")
+            
     return render_template("editor.html",
                            title = 'StrategyEditor',
-                           strategyEditorForm = strategyEditorForm)
+                           strategyEditorForm = strategyEditorForm,
+                           strategyHrefNameList = strategyHrefNameList)
