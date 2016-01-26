@@ -36,6 +36,11 @@ def transition():
     transitionPanelForm.strategyListField.choices = [(name, name) for name in transition.getStrategyNameList()]
 
     if transitionPanelForm.validate_on_submit():
+        #TODO: run strategy in new process
+        #1. start transition in new process
+        #2. display page as well. it seems need return render function at this step. but not decide yet
+        #3. if step2 return render function, 
+        #  it has to re-render the page in transition process callback function with new hqData.json and profits.json
         startDate = transitionPanelForm.startDateField.data
         endDate = transitionPanelForm.endDateField.data
         strategyName = transitionPanelForm.strategyListField.data
