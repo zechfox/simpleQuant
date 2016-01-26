@@ -4,6 +4,7 @@ Created on Thu Dec 31 19:40:08 2015
 
 @author: zech
 """
+import os
 from flask import render_template, flash, redirect, session
 import json
 
@@ -57,10 +58,10 @@ def transition():
     return render_template("transition.html",
                            title = 'Trasition',
                            transitionPanelForm = transitionPanelForm)
-                           
+
 @app.route('/manageStrategy', methods=['GET','POST'])
 @app.route('/manageStrategy/<string:page>', methods=['GET','POST'])
-def editStrategy(page = ''):
+def manageStrategy(page = ''):
     #1. check page is valid or not, if page not empty
     #2. if page = '' or not valid, list all strategy name
     #3. if page = valid strategy name, render strategy editor with preload strategy code
@@ -71,13 +72,13 @@ def editStrategy(page = ''):
     strategyHrefNameList = [StrategyHrefName(name) for name in strategyNameList]
 
     if strategyEditorForm.validate_on_submit():
-        print("submit strategy")        
-            
+        print("submit strategy")
+
 
     elif page == 'newStrategy':
         print("new Strategy")
         strategyHrefNameList.clear()
-        return render_template("editor.html",
+        return render_template('editor.html',
                     title = 'StrategyEditor',
                     strategyEditorForm = strategyEditorForm,
                     strategyHrefNameList = strategyHrefNameList)
@@ -85,16 +86,21 @@ def editStrategy(page = ''):
         #render strategy editor with preload strategy code
         print("submit OK")
         strategyHrefNameList.clear()
-        return render_template("editor.html",
+        strategyEditorForm.strategyNameField.data = page
+        strategyFilePath = os.path.join(os.path.dirname(__file__) + '/../strategy/' + page + '.py')
+        fo = open(strategyFilePath, 'r')
+        strategyEditorForm.strategyEditorField.data = fo.read()
+        fo.close()
+        return render_template('editor.html',
                     title = 'StrategyEditor',
                     strategyEditorForm = strategyEditorForm,
-                    strategyHrefNameList = strategyHrefNameList)        
+                    strategyHrefNameList = strategyHrefNameList)
     else:
         #page = '' or not in strategy name or not valid
         #render as /manangeStrategy
         print("submit NOT OK")
-            
-    return render_template("editor.html",
+
+    return render_template('editor.html',
                            title = 'StrategyEditor',
                            strategyEditorForm = strategyEditorForm,
                            strategyHrefNameList = strategyHrefNameList)
