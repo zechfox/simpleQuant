@@ -73,7 +73,18 @@ def manageStrategy(page = ''):
 
     if strategyEditorForm.validate_on_submit():
         print("submit strategy")
-
+        newStrategyName = strategyEditorForm.strategyNameField.data
+        if newStrategyName not in strategyNameList:
+          newStrategyCode = strategyEditorForm.strategyEditorField.data
+          strategyFilePath = os.path.join(os.path.dirname(__file__) + '/../strategy/' + newStrategyName + '.py')
+          fo = open(strategyFilePath, 'w')
+          fo.write(newStrategyCode)
+          fo.close()
+          return redirect('/manageStrategy')
+        else:
+          #TODO: prompt error when strategy name exist
+          strategyEditorForm.strategyNameField.errors = 'Strategy Name has exist, please try another one!'
+          return redirect('/manageStrategy/newStrategy')
 
     elif page == 'newStrategy':
         print("new Strategy")

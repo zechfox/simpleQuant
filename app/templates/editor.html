@@ -58,6 +58,7 @@
             <li><a href="{{ item.href }}">{{ item.name }}</a></li>
           {% endfor %}
         </ul>
+        <a href="/manageStrategy/newStrategy" class="btn btn-primary">New Strategy</a>
       {% else %}
         {% call macros.render_form(strategyEditorForm, action_text='Save Strategy')%}
           {% if strategyEditorForm.strategyNameField.data %}
