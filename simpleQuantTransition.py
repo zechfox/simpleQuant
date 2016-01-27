@@ -21,7 +21,8 @@ class SimpleQuantTransition(SimpleQuantSafeProcess):
         SimpleQuantSafeProcess.__init__(self, feedbackQueue)
         self.strategy_manager = SimpleQuantStrategyManager()
         self.data_manager = SimpleQuantUIDataManager(stockSymbol, startDate, endDate)
-        self.event_engine = SimpleQuantEventEngine()
+        #TODO:fix crash cause by event engine
+        #self.event_engine = SimpleQuantEventEngine()
         self.strategy_name = strategyName
 
     def getStockData(self):

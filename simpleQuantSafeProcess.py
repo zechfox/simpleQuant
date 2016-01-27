@@ -11,7 +11,7 @@ class SimpleQuantSafeProcess(Process):
     Process.__init__(self)
     self.feedback_queue = feedback_queue
     rootlogger = logging.getLogger('')
-    rootlogger.setLevel(logging.DEBUG)
+    rootlogger.setLevel(logging.INFO)
     socketh = SocketHandler('localhost', DEFAULT_TCP_LOGGING_PORT)
     rootlogger.addHandler(socketh)
 
@@ -28,4 +28,3 @@ class SimpleQuantSafeProcess(Process):
     except Exception as e:
         MyLogger.error(e)
         raise e
-    return

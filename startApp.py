@@ -16,7 +16,7 @@ import simpleQuantLogger
 from app import app
 
 #----------------------------------------------------------------------
-def main():
+def startApp():
     rootLogger = logging.getLogger('')
     rootLogger.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
@@ -30,11 +30,12 @@ def main():
     print('%s started at %s' % (recv.__class__.__name__, recv.server_address))
     thr_recv.start()
     try:
-        sys.exit(app.run(debug = True))
+        #set debug true will start main() twice, one for start main(), the other for monitor project modification
+        sys.exit(app.run(debug = False))
     except(KeyboardInterrupt, SystemExit):
-      recv.shutdown()
-      sys.exit()
+        recv.shutdown()
+        sys.exit()
 
 
 if __name__ == '__main__':
-    main()
+    startApp()

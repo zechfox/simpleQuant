@@ -50,7 +50,6 @@ def transition():
         strategyName = transitionPanelForm.strategyListField.data
         startDate = transitionPanelForm.startDateField.data
         endDate = transitionPanelForm.endDateField.data
-
         transition = SimpleQuantTransition(stockSymbol, strategyName, startDate, endDate, feedback_queue)
         transition.start()
 
