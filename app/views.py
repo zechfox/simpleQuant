@@ -5,6 +5,8 @@ Created on Thu Dec 31 19:40:08 2015
 @author: zech
 """
 import os
+import datetime
+from multiprocessing import Queue
 from flask import render_template, flash, redirect, session
 import json
 
@@ -13,8 +15,9 @@ from .forms import MainSearchForm, TransitionPanelForm, StrategyEditorForm
 from .forms import StrategyHrefName
 from simpleQuantTransition import SimpleQuantTransition
 from simpleQuantStrategyManager import SimpleQuantStrategyManager
+from simpleQuantDataManager import SimpleQuantUIDataManager
 
-
+feedback_queue = Queue()
 
 @app.route('/', methods=['GET','POST'])
 @app.route('/index', methods=['GET','POST'])
@@ -32,30 +35,37 @@ def index():
 def transition():
     transitionPanelForm = TransitionPanelForm()
     stockSymbol = session.get('stockSymbol')
-    transition = SimpleQuantTransition(stockSymbol)
-    transitionPanelForm.strategyListField.choices = [(name, name) for name in transition.getStrategyNameList()]
+    strategyManager = SimpleQuantStrategyManager()
+
+    transitionPanelForm.strategyListField.choices = [(name, name) for name in strategyManager.getStrategyNameList()]
+
 
     if transitionPanelForm.validate_on_submit():
         #TODO: run strategy in new process
         #1. start transition in new process
-        #2. display page as well. it seems need return render function at this step. but not decide yet
-        #3. if step2 return render function, 
-        #  it has to re-render the page in transition process callback function with new hqData.json and profits.json
+        #2. display page as well. wait until transition finish. It's no need render template instantly after strat transtion,
+        #   because javascript can display page as well when click 'start strategy', while in backend, parent process wait for
+        #   transition process finish, then render the template again, the well will disapear.
+        #3. render the template
+        strategyName = transitionPanelForm.strategyListField.data
         startDate = transitionPanelForm.startDateField.data
         endDate = transitionPanelForm.endDateField.data
-        strategyName = transitionPanelForm.strategyListField.data
 
-        transition.updateTransitionContext(startDate, endDate)
-        hqData = transition.getStockData()
-        profits = transition.runStrategy(strategyName)
+        transition = SimpleQuantTransition(stockSymbol, strategyName, startDate, endDate, feedback_queue)
+        transition.start()
 
-        with open('app/static/json/hqData.json', 'w') as f:
-            f.write(json.dumps(hqData))
-        with open('app/static/json/profits.json', 'w') as f:
-            f.write(json.dumps(profits))
-        return redirect('/transition')
+        #wait transition finish
+        transition.join()
+
+        return render_template("transition.html",
+                               title = 'Trasition',
+                               transitionPanelForm = transitionPanelForm)
     else:
-        hqData = transition.getStockData()
+        endDate = datetime.datetime.today()
+        deltaDays = datetime.timedelta(days=-60)
+        startDate = endDate + deltaDays
+        dataManager = SimpleQuantUIDataManager(stockSymbol, startDate, endDate)
+        hqData = dataManager.getStockData()
         with open('app/static/json/hqData.json', 'w') as f:
             f.write(json.dumps(hqData))
 
