@@ -1,0 +1,17 @@
+<div class="row">
+  <div class="col-md-12">
+    <div style="display: block;">
+      <div *ngIf="lineChartData">
+        <canvas baseChart width="400" height="110"
+                [datasets]="lineChartData"
+                [labels]="lineChartLabels"
+                [options]="lineChartOptions"
+                [colors]="lineChartColors"
+                [legend]="lineChartLegend"
+                [chartType]="lineChartType"
+                (chartHover)="chartHovered($event)"
+                (chartClick)="chartClicked($event)"></canvas>
+      </div>
+    </div>
+  </div>
+</div>

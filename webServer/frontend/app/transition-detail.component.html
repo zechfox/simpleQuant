@@ -1,0 +1,25 @@
+<div *ngIf="transition">
+  <h2>{{transition.name}} details!</h2>
+  <div class="container-fluid">
+    <div class="col-xs-12 col-md-8">
+      <line-chart [lineChartData]="dataSets" [lineChartLabels]='labels'></line-chart>
+      <line-chart [lineChartData]="results" [lineChartLabels]='labels'></line-chart>
+    </div>
+    <div class="col-xs-6 col-md-4">
+      <div>
+        <h3>Transition Configuration</h3>
+	<dynamic-form [questions]="transitionQuestions" (formJson)='onChange($event)' ></dynamic-form>
+      </div>
+      <h4>Customize Parameters</h4>
+        <div *ngIf="parameterQuestions">
+          <dynamic-form [questions]="parameterQuestions" (formJson)='onParameterChange($event)' ></dynamic-form>
+	</div>
+      <div class="form-row">
+        <button (click)="onUpdate()" [disabled]="!isFormChanged">Update Transition</button>
+        <button (click)="onRunTransition()" >Run Transition</button>
+      </div>
+    </div>
+  </div>
+  <button (click)="goBack()">Back</button>
+</div>
+

@@ -1,0 +1,12 @@
+<div *ngIf="strategy">
+  <h2>{{strategy.name}} details!</h2>
+  <div>
+    <label>id: </label>{{strategy.id}}
+  </div>
+  <div>
+    <label>name: </label>
+    <input [(ngModel)]="strategy.name" placeholder="name" />
+  </div>
+  <button (click)="goBack()">Back</button>
+</div>
+

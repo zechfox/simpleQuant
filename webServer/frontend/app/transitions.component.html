@@ -1,0 +1,35 @@
+<h3>Top Transitions</h3>
+<div class="grid grid-pad">
+   <a (click)="showModal();" class="col-xs-2">
+     <div class="module transition">
+       <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+     </div>
+   </a>
+   <a *ngFor="let transition of transitions"  [routerLink]="['/transition/detail', transition.id]"  class="col-xs-2"> 
+    <div class="module transition">
+      <h4>{{transition.name}}</h4>
+    </div>
+  </a>
+</div>
+<div class="modal fade" bsModal #staticModal="bs-modal" [config]="{backdrop: 'static'}"
+         tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title pull-left">Static modal</h4>
+        <button type="button" class="close pull-right" aria-label="Close" (click)="hideModal()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        This is static modal, backdrop click will not close it.
+        Click <b>&times;</b> to close modal.
+	<dynamic-form [questions]="questions" (formJson)='onChange($event)' ></dynamic-form>
+        <div class="form-row">
+          <button (click)="onSubmit()" [disabled]="!isFormChanged">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

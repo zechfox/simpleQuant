@@ -42,7 +42,22 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+#temp files
+*.swp
+*.swo
+*.swn
+*.swm
+*.map
+
 # simple quant ignore
 *.pyc
 *.log
+*.db
 .__pycache__
+bin/
+lib/
+include/
+webServer/frontend/node_modules/
+webServer/frontend/app/*.js
+webServer/frontend/app/*.map
+webServer/backend/strategy/

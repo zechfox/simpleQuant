@@ -1,0 +1,30 @@
+<!--<template #popTemplate>Here we go:<codemirror [(ngModel)]="content" [config]="config"></codemirror> <div [innerHtml]="html"></div></template>-->
+<h2>My Strategies</h2>
+    <div class="col-xs-12 col-md-4">
+        <ul class="strategies">
+            <li *ngFor="let strategy of strategies" 
+              [class.selected]="strategy === selectedStrategy"
+              (click)="onSelect(strategy)" 
+	    >
+	    <!--
+	      [popover]="popTemplate" popoverTitle="Dynamic html inside" placement="right" 
+	    >
+	    -->
+	    <span class="badge">{{strategy.id}}</span> {{strategy.name}}
+            </li>
+
+        </ul>
+    </div>
+    <div class="col-xs-12 col-md-8"> 
+	<div *ngIf="selectedStrategy">
+	    <h2>
+		{{selectedStrategy.name | uppercase}} is my strategy
+	    </h2>
+	    <codemirror [(ngModel)]="strategyCode" [config]="config"></codemirror>
+	    <button class="btn btn-primary" (click)="saveChange()"> Save </button>
+	    <button class="btn btn-primary" (click)="discardChange()"> Cancel </button>
+	    <!--   <button (click)="gotoDetail()">View Details</button> -->
+	</div>
+   </div> 
+
+
