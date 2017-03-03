@@ -7,11 +7,15 @@ Created on Fri Oct 30 20:38:19 2015
 import asyncio
 import aiohttp
 import datetime
+import functools
 import json
 import logging
 import re
 import pandas as pd
+import tushare as ts
 import urllib
+
+
 
 MyLogger = logging.getLogger(__name__)
 
@@ -52,23 +56,25 @@ class SimpleQuantDataManager:
             except AssertionError:
                 print('Error!', response.url, response.status) 
 
+    """
+    Parameters:
+               object: object code, currently, only stock code supported
+               duration: time duration, calculate from today
+               filter: data filter, could close, open, high, low, volume
+    """    
     async def getObjectData(self, object, duration, filter=['all']):
         endData = datetime.datetime.today()
         deltaDayas = datetime.timedelta(days=-duration)
         startData = endData + deltaDayas
-        requestUrl = self.dbAddr + object + '&start=' \
-                     + startData.strftime('%Y%m%d') + '&end=' \
-                     + endData.strftime('%Y%m%d')
-        fetchedJsonData = await self.fetchPage(requestUrl)
-        fetchedData = json.loads(fetchedJsonData)
-        status = fetchedData[0]['status']
-        if status != 0:
-            fetchedObjectData = fetchedData[0]['msg']
+        loop = asyncio.get_event_loop()
+        future = loop.run_in_executor(None, functools.partial(ts.get_k_data, object, startData.strftime('%Y%m%d'), endData.strftime('%Y%m%d')))
+        fetchedObjectData = await future
+        if filter[0] == 'all':
+            filterData = fetchedObjectData
         else:
-            fetchedObjectData = self.filterData(fetchedData[0]['hq'], filter)
-
+            filterData = fetchedObjectData[filter]
         
-        return status, fetchedObjectData
+        return 0, filterData.to_json()
 
 
     def filterData(self, data, filter):
