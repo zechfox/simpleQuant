@@ -6,10 +6,9 @@ import { Router } from '@angular/router';
 
 
 @Component({
-  moduleId: module.id,
   selector: 'my-strategies',
-  templateUrl: 'strategies.component.html',
-  styleUrls: [ 'strategies.component.css' ]
+  templateUrl: './strategies.component.html',
+  styleUrls: [ './strategies.component.css' ]
 })
 
 

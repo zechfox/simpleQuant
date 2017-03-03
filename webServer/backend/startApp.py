@@ -26,7 +26,7 @@ def startApp():
 
     try:
         #set debug true will start main() twice, one for start main(), the other for monitor project modification
-        sys.exit(app.run(debug = False))
+        sys.exit(app.run(debug = False, host='0.0.0.0'))
     except(KeyboardInterrupt, SystemExit):
         recv.shutdown()
         sys.exit()

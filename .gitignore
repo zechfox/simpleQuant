@@ -53,9 +53,12 @@ Temporary Items
 *.pyc
 *.log
 *.db
+pyvenv.cfg
 .__pycache__
 bin/
 lib/
+lib64/
+share/
 include/
 webServer/frontend/node_modules/
 webServer/frontend/app/*.js

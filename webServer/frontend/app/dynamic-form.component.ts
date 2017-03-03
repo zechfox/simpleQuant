@@ -7,9 +7,8 @@ import { QuestionControlService }    from './question-control.service';
 import 'rxjs/add/operator/switchMap';
 
 @Component({
-  moduleId: module.id,
   selector: 'dynamic-form',
-  templateUrl: 'dynamic-form.component.html',
+  templateUrl: './dynamic-form.component.html',
   providers: [ QuestionControlService ]
 })
 

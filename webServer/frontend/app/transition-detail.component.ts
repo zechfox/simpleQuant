@@ -15,10 +15,9 @@ import 'rxjs/add/operator/switchMap';
 
 
 @Component({
-  moduleId: module.id,
   selector: 'my-transition-detail',
-  templateUrl: 'transition-detail.component.html',
-  styleUrls: [ 'transition-detail.component.css' ] 
+  templateUrl: './transition-detail.component.html',
+  styleUrls: [ './transition-detail.component.css' ] 
 })
 
 

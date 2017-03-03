@@ -7,7 +7,6 @@ import { TransitionService } from './transition.service';
 
 
 @Component({
-  moduleId: module.id,
   selector: 'my-transitions',
   templateUrl: './transitions.component.html',
   styleUrls: [ './transitions.component.css' ]

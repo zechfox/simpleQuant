@@ -9,10 +9,9 @@ import 'rxjs/add/operator/switchMap';
 
 
 @Component({
-  moduleId: module.id,
   selector: 'my-strategy-detail',
-  templateUrl: 'strategy-detail.component.html',
-  styleUrls: [ 'strategy-detail.component.css' ] 
+  templateUrl: './strategy-detail.component.html',
+  styleUrls: [ './strategy-detail.component.css' ] 
 })
 
 
