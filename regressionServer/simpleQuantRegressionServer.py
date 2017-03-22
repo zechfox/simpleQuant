@@ -131,10 +131,10 @@ class SimpleQuantRegressionServerApplication(object):
         task = loop.run_in_executor(self.executor, transition)
         print('waiting for executor task')
 
-        objectData = await asyncio.wait_for(task, 60.0)
+        objectData, report = await asyncio.wait_for(task, 60.0)
 
 
-        respMsg = ['startRegressionCfm', objectData.to_json()]
+        respMsg = ['startRegressionCfm', {'objectData':objectData, 'report':report}]
         await self.server.send(respMsg)
         # get out the strategy name to be run
 

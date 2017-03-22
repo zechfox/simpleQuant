@@ -4,10 +4,11 @@ import { ActivatedRoute, Params }   from '@angular/router';
 import { Location }                 from '@angular/common';
 
 import { DropdownQuestion } from './question-dropdown';
-import { ObjectData } from './object-data';
+import { Parameter } from './parameter';
 import { QuestionBase }     from './question-base';
 import { QuestionService } from './question.service';
 import { TextboxQuestion }  from './question-textbox';
+import { TransitionData } from './transition-data';
 import { TransitionService } from './transition.service';
 import { Transition }         from './transition';
 import 'rxjs/add/operator/switchMap';
@@ -24,11 +25,12 @@ import 'rxjs/add/operator/switchMap';
 export class TransitionDetailComponent implements OnInit {
   @ViewChild(BaseChartDirective) chart: BaseChartDirective;
   transition: Transition;
-  objectData: ObjectData;
+  transitionData: TransitionData;
   dataSets: Array<any> = [{'data':[0,0,0,0,0,0,0,0,0,0,0,0,0,0], 'label':'close'}];
   labels: Array<any> = ['0','1','2','3','4','5','6','7','8','9','10','11','12','13'];
 
   results: Array<any> = [{'data':[0,0,0,0,0,0,0,0,0,0,0,0,0,0], 'label':'ROI'}];
+  evaluateReport: Parameter[] = [];
   transitionQuestions: any[] = [];
   parameterQuestions: any[] = [];
   isFormChanged: boolean;
@@ -45,7 +47,7 @@ export class TransitionDetailComponent implements OnInit {
     this.route.params
       .switchMap((params: Params) => this.transitionService.getTransition(+params['id']))
       .subscribe(transition => this.transitionUpdated(transition));
-
+    console.log(this.evaluateReport);
       
   }
 
@@ -77,7 +79,7 @@ export class TransitionDetailComponent implements OnInit {
     this.transition.updateFromObject(transition); 
     this.transitionQuestions = this.questionService.getQuestionsFromTrans(transition); 
     this.parameterQuestions = this.questionService.getQuestionsFromParameters(transition.customizeParameter); 
-    this.transitionService.getTransitionObjectData(this.transition.id).then(objectData => this.updateObjectData(objectData),
+    this.transitionService.getTransitionObjectData(this.transition.id).then(transitionData => this.updateTransitionData(transitionData),
                  error => this.errMsg = <any>error);
   }
 
@@ -87,15 +89,16 @@ export class TransitionDetailComponent implements OnInit {
       this.onUpdate();
     }
     this.transitionService.getTransitionResults(this.transition.id)
-           .then(objectData => this.updateObjectData(objectData),
+           .then(transitionData => this.updateTransitionData(transitionData),
                  error => this.errMsg = <any>error);
   }
 
-  updateObjectData(objectData: ObjectData): void{
-    this.objectData = objectData; 
-    this.dataSets = objectData.dataSets; 
-    this.labels = objectData.labels; 
-    this.results = objectData.results;
+  updateTransitionData(transitionData: TransitionData): void{
+    this.transitionData = transitionData; 
+    this.dataSets = transitionData.dataSets; 
+    this.labels = transitionData.labels; 
+    this.results = transitionData.results;
+    this.evaluateReport = transitionData.evaluateReport;
     //ng2-charts@1.5.0 has bug for update labels,
     //remove following work around in later version
     setTimeout(() => {

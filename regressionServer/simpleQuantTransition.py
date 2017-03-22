@@ -5,6 +5,7 @@ import sys
 
 from simpleQuantConstants import *
 from simpleQuantStrategyManager import SimpleQuantStrategyManager
+from simpleQuantEvaluator import SimpleQuantEvaluator
 
 class SimpleQuantTransition:
     def __init__(self, jsonString):
@@ -32,7 +33,11 @@ class SimpleQuantTransition:
         log.info('{name} is running {strategyName}'.format(name=self.name, strategyName=self.strategyName))
         self.runStrategy()
 
-        return self.objectData
+        evaluator = SimpleQuantEvaluator()
+        evaluator.performEvaluate(self)
+        report = evaluator.getReport()
+
+        return self.objectData.to_json(), json.dumps(report)
 
 
     def getTransitionName(self):
@@ -48,7 +53,7 @@ class SimpleQuantTransition:
         return self.duration
 
     def setTransitionObjectData(self, objectData):
-        self.objectData = objectData
+        self.objectData = objectData.reset_index(drop=True)
         
     def runStrategy(self):
         self.initial()
@@ -107,13 +112,5 @@ class SimpleQuantTransition:
 
     def end(self):
         self.strategy.tearDown()
-        self.calculateRoi()
-        self.calculateSharp()
         self.objectData = self.objectData.assign(marketValue = self.marketValue)
-
-    def calculateRoi(self):
-        pass
-
-    def calculateSharp(self):
-        pass
 

@@ -14,6 +14,12 @@
         <div *ngIf="parameterQuestions">
           <dynamic-form [questions]="parameterQuestions" (formJson)='onParameterChange($event)' ></dynamic-form>
 	</div>
+      <h4>Evaluate Report</h4>
+        <div *ngIf="evaluateReport">
+          <i *ngFor="let indicator of evaluateReport">
+            <h5>{{indicator.name}}:{{indicator.value}}</h5>
+          </i>
+        </div>
       <div class="form-row">
         <button (click)="onUpdate()" [disabled]="!isFormChanged">Update Transition</button>
         <button (click)="onRunTransition()" >Run Transition</button>

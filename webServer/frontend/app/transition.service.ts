@@ -1,7 +1,7 @@
 import { Http, Response } from '@angular/http';
 import { Headers, RequestOptions } from '@angular/http';
 import { Injectable } from '@angular/core';
-import { ObjectData } from './object-data';
+import { TransitionData } from './transition-data';
 import { Transition } from './transition';
 
 @Injectable()
@@ -23,7 +23,7 @@ import { Transition } from './transition';
                  .then(transitions => transitions.find(transition => transition.id === id));
     }
 
-    getTransitionObjectData(id: number): Promise<ObjectData> {
+    getTransitionObjectData(id: number): Promise<TransitionData> {
       let requestUrl = this.transitionDetailUrl + id.toString() + '/objectData';
       return this.http.get(requestUrl)
                       .toPromise()
@@ -31,7 +31,7 @@ import { Transition } from './transition';
 		      .catch(this.handleError);
     }
 
-    getTransitionResults(id: number): Promise<ObjectData> {
+    getTransitionResults(id: number): Promise<TransitionData> {
       let requestUrl = this.transitionDetailUrl + id.toString() + '/results';
       console.log(requestUrl);
       return this.http.get(requestUrl)

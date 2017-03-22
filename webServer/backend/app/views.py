@@ -163,8 +163,9 @@ def getTransitionData(transitionId, data):
                 dataSets = [{'data':(df['close'].values.tolist()), 'label':'close'}]
                 labels = df['date'].apply(lambda x: x.strftime('%Y%m%d')).values.tolist()
                 results = [{'data': [0] * len(labels), 'label':'Market Value'}]
+                report = []
 
-                respData = {'objectName':transition.object, 'dataSets':dataSets, 'labels':labels, 'results': results}
+                respData = {'objectName':transition.object, 'dataSets':dataSets, 'labels':labels, 'results': results, 'evaluateReport':report}
                 respStatus = 200
             elif msgName == 'getObjectDataRej':
                 print('receive getObjectDataRej with status:{status}, message:{message}.'.format(status=payload['status'], message=payload['msg']))
@@ -179,9 +180,12 @@ def getTransitionData(transitionId, data):
             respMsg = sock.recv_json()
             msgName = respMsg[0]
             payload = respMsg[1]
+            objectData = payload['objectData']
+            report = json.loads(payload['report'])
+            reportList = [{'name':k,'value':v} for (k, v) in report.items()]
             if msgName == 'startRegressionCfm':
                 print('receive startRegressionCfm')
-                df = pd.read_json(payload)
+                df = pd.read_json(objectData)
                 df.sort_index(inplace=True, ascending=False)
                 results = [{'data':(df['marketValue'].values.tolist()), 'label':'Market Value'}]
                 labels = df['date'].apply(lambda x: x.strftime('%Y%m%d')).values.tolist()
@@ -189,7 +193,7 @@ def getTransitionData(transitionId, data):
                 #results = [{'data':[0,0,0,0,0,0,0,0,0,0,0,0,0,0], 'label':'Market Value'}]
                 #labels = ['0','1','2','3','4','5','6','7','8','9','10','11','12','13'];
                 #dataSets = results
-                respData = {'objectName':transition.object, 'dataSets':dataSets, 'labels':labels, 'results': results}
+                respData = {'objectName':transition.object, 'dataSets':dataSets, 'labels':labels, 'results': results, 'evaluateReport': reportList}
                 respStatus = 200
             elif msgName == 'startRegressionRej':
                 print('receive startRegressionRej with status:{status}, message:{message}.'.format(status=payload['status'], message=payload['msg']))
