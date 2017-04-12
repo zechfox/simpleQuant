@@ -110,7 +110,8 @@ class SimpleQuantRegressionServerApplication(object):
         status, fetchedData = await self.dataManager.getObjectData(objectName, duration)
 
         if status != 0:
-            respMsg = ['getObjectDataRej', {'status':status, 'msg':fetchedData}]
+            sortedData = fetchedData.sort_values('date', ascending=True).reset_index(drop=True)
+            respMsg = ['getObjectDataRej', {'status':status, 'msg':sortedData}]
         else:
             respMsg = ['getObjectDataCfm', fetchedData]
 
@@ -166,6 +167,7 @@ class SimpleQuantRegressionServerApplication(object):
         status, fetchedData = await self.dataManager.getObjectData(objectName, duration) 
         if status == 0:
             df = pd.read_json(fetchedData)
+            df = df.sort_values('date', ascending=True).reset_index(drop=True)
             transition.setTransitionObjectData(df)
         else:
             print('prepare transition failed')

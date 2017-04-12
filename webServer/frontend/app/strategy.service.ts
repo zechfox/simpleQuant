@@ -46,7 +46,7 @@ import 'rxjs/add/operator/toPromise';
     }
     private extractData(res: Response) {
       let body = res.json();
-      return body as Strategy[] || { };
+      return body || { };
     }
     private handleError(error: any): Promise<any> {
       console.error('An error occurred', error); // for demo purposes only

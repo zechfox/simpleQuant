@@ -53,7 +53,7 @@ class SimpleQuantTransition:
         return self.duration
 
     def setTransitionObjectData(self, objectData):
-        self.objectData = objectData.reset_index(drop=True)
+        self.objectData = objectData
         
     def runStrategy(self):
         self.initial()

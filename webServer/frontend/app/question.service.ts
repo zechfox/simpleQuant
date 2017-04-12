@@ -91,7 +91,7 @@ export class QuestionService {
 
   getQuestionsFromParameters(json: string): QuestionBase<any>[] {
     let questions: QuestionBase<any>[] = [];
-    if(typeof json == 'undefined')
+    if(typeof json == 'undefined' || json == '')
       return questions;
     let parameters:Parameter[] = JSON.parse(json);
     for (var index in parameters) {
@@ -102,7 +102,7 @@ export class QuestionService {
 	                     type: 'string',
 	                     order: index
 	                   });
-        questions.push(textQuestion);
+      questions.push(textQuestion);
     }
 
     return questions.sort((a, b) => a.order - b.order);

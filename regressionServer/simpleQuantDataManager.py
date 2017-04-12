@@ -67,7 +67,7 @@ class SimpleQuantDataManager:
         deltaDayas = datetime.timedelta(days=-duration)
         startData = endData + deltaDayas
         loop = asyncio.get_event_loop()
-        future = loop.run_in_executor(None, functools.partial(ts.get_k_data, object, startData.strftime('%Y%m%d'), endData.strftime('%Y%m%d')))
+        future = loop.run_in_executor(None, functools.partial(ts.get_k_data, object, startData.strftime('%Y-%m-%d'), endData.strftime('%Y-%m-%d')))
         fetchedObjectData = await future
         if filter[0] == 'all':
             filterData = fetchedObjectData

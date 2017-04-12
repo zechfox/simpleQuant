@@ -33,7 +33,6 @@ import { Transition } from './transition';
 
     getTransitionResults(id: number): Promise<TransitionData> {
       let requestUrl = this.transitionDetailUrl + id.toString() + '/results';
-      console.log(requestUrl);
       return this.http.get(requestUrl)
                       .toPromise()
 		      .then(this.extractData)

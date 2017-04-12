@@ -76,7 +76,7 @@ export class TransitionDetailComponent implements OnInit {
 
   transitionUpdated(transition:Transition): void {
     this.transition = new Transition();
-    this.transition.updateFromObject(transition); 
+    this.transition.updateFromObject(transition);
     this.transitionQuestions = this.questionService.getQuestionsFromTrans(transition); 
     this.parameterQuestions = this.questionService.getQuestionsFromParameters(transition.customizeParameter); 
     this.transitionService.getTransitionObjectData(this.transition.id).then(transitionData => this.updateTransitionData(transitionData),
