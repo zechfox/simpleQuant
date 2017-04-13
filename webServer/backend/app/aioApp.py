@@ -1,3 +1,4 @@
+import os
 import argparse
 import aiopg.sa
 import asyncio
@@ -7,7 +8,9 @@ import zmq
 
 from aiohttp import web
 from trafaret_config import commandline
-from routes import setup_routes
+
+from .routes import setup_routes
+from common.simpleQuantZmqProcess import SimpleQuantZmqRequestReplyProcess
 
 primitive_ip_regexp = r'^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$'
 
@@ -21,6 +24,11 @@ TRAFARET = T.Dict({
             'port': T.Int(),
             'minsize': T.Int(),
             'maxsize': T.Int(),
+        }),
+    T.Key('regressionServer'):
+        T.Dict({
+            'addr': T.String(),
+            'port': T.Int(),
         }),
     T.Key('host'): T.String(regex=primitive_ip_regexp),
     T.Key('port'): T.Int(),
@@ -40,14 +48,11 @@ async def init_pg(app):
     app['db'] = engine
 
 async def init_regression(app):
-    serverAddr = '127.0.0.1:1234'
     msg = ['connectionReq', {'name':'zechfox'}]
-    context = zmq.Context()
-    sock = context.socket(zmq.REQ)
-    sock.connect('tcp://%s:%s' % ('127.0.0.1', 1234))
-    sock.send_json(msg)
-    connectionCfm = sock.recv_json()
-    app['regrSock'] = sock
+
+    regressionClient = app['regressionClient']
+    await regressionClient.send(msg)
+    msgName, data = await regressionClient.recv()
 
 
 
@@ -55,10 +60,13 @@ async def close_pg(app):
     app['db'].close()
     await app['db'].wait_closed()
 
-def init(loop, argv):
+def init(argv):
+
     ap = argparse.ArgumentParser()
+    dirPath = os.path.dirname(os.path.realpath(__file__)) 
+    configFile = os.path.abspath(os.path.join(dirPath, '../config/config.yaml'))
     commandline.standard_argparse_options(ap,
-                                          default_config='../config/config.yaml')
+                                          default_config=configFile)
     #
     # define your command-line arguments here
     #
@@ -66,11 +74,24 @@ def init(loop, argv):
 
     config = commandline.config_from_options(options, TRAFARET)
 
+    #
+    #regression server
+    #
+    regressionServerConfig = config['regressionServer']
+    regressionServerAddr = regressionServerConfig['addr']
+    regressionServerPort = regressionServerConfig['port']
+    serverAddr = regressionServerAddr + ':' + str(regressionServerPort)
+    regressionClient = SimpleQuantZmqRequestReplyProcess(False, serverAddr)
+    regressionClient.run()
     # setup application and extensions
+    loop = asyncio.get_event_loop()
     app = web.Application(loop=loop)
 
     # load config from yaml file in current dir
     app['config'] = config
+
+    #regression client
+    app['regressionClient'] = regressionClient
 
     # create connection to the database
     app.on_startup.append(init_pg)
@@ -84,14 +105,13 @@ def init(loop, argv):
 
     return app 
 
-def main(argv):
+def run(argv):
     # init logging
 
-    loop = asyncio.get_event_loop()
 
-    app = init(loop, argv)
+    app = init(argv)
     web.run_app(app,
                 host=app['config']['host'],
                 port=app['config']['port'])
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    run(sys.argv[1:])

@@ -1,5 +1,5 @@
 import os, sys, inspect
-from aiohttp_views import index, transitions, getStrategies, getStrategyData, getTransitionData, updateTransition
+from .aioAppViews import index, transitions, getStrategies, getStrategyData, getTransitionData, updateTransition
 static_folder_root = os.path.join(os.path.abspath(os.path.join(__file__, '../../../')), "frontend")
 
 def setup_routes(app):

@@ -154,6 +154,10 @@ class SimpleQuantZmqRequestReplyProcess(SimpleQuantZmqProcessBase):
         msg = json.dumps(obj) 
         await self.sock.send(msg)
 
+    async def recv(self):
+        msg = await self.sock.recv_multipart()
+        return json.loads(msg[0])
+
     def registerMsg(self, msgName, msgHandler):
         self.msg_table.update({msgName:msgHandler})
 

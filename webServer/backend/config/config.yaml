@@ -7,5 +7,9 @@ postgres:
   minsize: 1
   maxsize: 5
 
+regressionServer:
+  addr: 127.0.0.1
+  port: 1234
+
 host: 0.0.0.0
 port: 8080
