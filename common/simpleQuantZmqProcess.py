@@ -31,8 +31,12 @@ class SimpleQuantZmqProcessBase():
 
         """
         self.context = zmq.asyncio.Context()
-        self.loop = zmq.asyncio.ZMQEventLoop()
-        asyncio.set_event_loop(self.loop)
+        loop = asyncio.get_event_loop()
+        if isinstance(loop, zmq.asyncio.ZMQEventLoop):
+            self.loop = loop
+        else:
+            self.loop = zmq.asyncio.ZMQEventLoop()
+            asyncio.set_event_loop(self.loop)
 
         sock = self.context.socket(sock_type)
 
@@ -180,4 +184,26 @@ class SimpleQuantZmqRequestReplyProcess(SimpleQuantZmqProcessBase):
                 raise AttributeError('%s starts with an "_"' % msgName)
             if msgName in self.msg_table:
                 self.loop.create_task(self.msg_table[msgName](*msg))
+
+class SimpleQuantZmqPubSubProcess(SimpleQuantZmqProcessBase):
+    """publisher/subscriber process for pub-sub model
+
+    """
+    def __init__(self, isPublisher, bind_addr, subscribe=b''):
+        super().__init__()
+
+        self.bind_addr = bind_addr
+        self.rep_stream = None
+        self.socketType = zmq.PUB if isPublisher else zmq.SUB
+        self.isPublisher = isPublisher
+        self._json_load = -1
+        self.msg_table = {}
+        self.status = 'not running'
+        self.subscribe = subscribe
+
+    def setup(self):
+        """
+        setup zmq 
+        """
+        super().setup(self.socketType, self.bind_addr, bind=self.isPublisher, subscribe=self.subscribe)
 

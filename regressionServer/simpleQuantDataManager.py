@@ -15,9 +15,11 @@ import pandas as pd
 import tushare as ts
 import urllib
 
+from common.simpleQuantLogger import SimpleQuantLogger
+
+logger = SimpleQuantLogger(__name__, '127.0.0.1:4321')
 
 
-MyLogger = logging.getLogger(__name__)
 
 def removeDuplicated(seq):
     seen = set()
@@ -51,10 +53,10 @@ class SimpleQuantDataManager:
         async with aiohttp.get(url) as response:
             try:
                 assert response.status == 200
-                print("OK!", response.url)
+                logger.info("OK!", response.url)
                 return await response.text()
             except AssertionError:
-                print('Error!', response.url, response.status) 
+                logger.error('Error!', response.url, response.status) 
 
     """
     Parameters:
@@ -122,7 +124,6 @@ class SimpleQuantDataManager:
     def updateStockData(self, startDate, endDate):
         url = ('http://q.stock.sohu.com/hisHq?code=cn_' +
                self.stock_symbol + '&start=' + self.start_date.strftime('%Y%m%d') + '&end=' + self.end_date.strftime('%Y%m%d'))
-        print(url)
         req = urllib.request.Request(url)
         with urllib.request.urlopen(req) as response:
             json_data = response.read().decode()
@@ -136,7 +137,7 @@ class SimpleQuantDataManager:
         #unzip rough_data, then zip them as list of tuple
         (self.date, self.open, self.close, self.change, self.chg_percent, self.low,
          self.high, self.volume, self.turnover, self.tunrover_rate) = zip(*(roughData[::-1]))
-        MyLogger.info("setBasicData....Done!")
+        logger.info("setBasicData....Done!")
 
     def initialHistoryWindow(self, windowsSize):
         self.history_windows_size = windowsSize
@@ -149,7 +150,7 @@ class SimpleQuantDataManager:
 
     def prepareHistoryData(self):
         self.setBasicData(self.getAppendStockData())
-        MyLogger.info("prepare history data....Done!")
+        logger.info("prepare history data....Done!")
 
     def getLowPrice(self):
         return self.low[self.history_windows_size + self.history_data_start_index]
@@ -159,7 +160,7 @@ class SimpleQuantDataManager:
 
     #called by online timer handler of transition
     def retreiveRealTimeQuotes(self):
-        MyLogger.info("retreive real time quotes")
+        logger.info("retreive real time quotes")
         stockSymbol = _code_to_symbol(self.stock_symbol)
         url = ('http://hq.sinajs.cn/list=' + stockSymbol)
         req = urllib.request.Request(url)
@@ -182,7 +183,7 @@ class SimpleQuantDataManager:
 
     def getLatestRealTimeQuotes(self, numbers):
         #return null if no enough data
-        MyLogger.info("get latest %d real time quotes", numbers)
+        logger.info("get latest %d real time quotes", numbers)
         dataLength = len(self.realtime_data)
         if dataLength > numbers:
             return self.realtime_data[(dataLength - numbers):-1]

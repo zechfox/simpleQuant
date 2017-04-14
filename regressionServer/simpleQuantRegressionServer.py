@@ -8,9 +8,13 @@ import sys
 #from zmq.utils import jsonapi as json
 
 from common.simpleQuantZmqProcess import SimpleQuantZmqRequestReplyProcess
+from common.simpleQuantLogger import SimpleQuantLogger
 from simpleQuantStrategyManager import SimpleQuantStrategyManager
 from simpleQuantDataManager import SimpleQuantDataManager
 from simpleQuantTransition import SimpleQuantTransition
+
+
+logger = SimpleQuantLogger(__name__, '127.0.0.1:4321')
 
 class SimpleQuantRegressionServerApplication(object):
     """ regression server application
@@ -33,19 +37,13 @@ class SimpleQuantRegressionServerApplication(object):
                             max_workers=multiprocessing.cpu_count(),
                         )
 
-        logging.basicConfig(
-            level=logging.INFO,
-            format='PID %(process)5s %(name)18s: %(message)s',
-            stream=sys.stderr,
-        )
-
-
     async def connectionReq(self, msg):
         """
         received connect request message from client
         """
-        log = logging.getLogger('SimpleQuantRegressionServerApplication::connectionReq()')
-        log.info('client {name} connect.'.format(name=msg['name']))
+        #log = logging.getLogger('SimpleQuantRegressionServerApplication::connectionReq()')
+        
+        logger.info('client {name} connect.'.format(name=msg['name']))
 
         if False == self.isConnected:
             self.isConnected = True
@@ -57,22 +55,22 @@ class SimpleQuantRegressionServerApplication(object):
         """
         client request strategy list
         """
-        print('client request strategy list.')
+        logger.info('client request strategy list.')
         id = 11
         strategyList = [{'name':strategyName, 'id':id} for id, strategyName in enumerate(self.strategyManager.getStrategyNameList())]
-        print(strategyList)
+        logger.info(strategyList)
 
         #get all strategy, make a list of them
         getStrategyListCfm = ['getStrategyListCfm', strategyList]
         #reply to client
         await self.server.send(getStrategyListCfm)
-        print('send out getStrategyListCfm')
+        logger.info('send out getStrategyListCfm')
 
     async def getStrategySourceCodeReq(self, msg):
         """
         client request strategy source code
         """
-        print('client request strategy source code.')
+        logger.info('client request strategy source code.')
         strategyName = msg['strategyName']
         status, sourceCode = self.strategyManager.getStrategySourceCode(strategyName)
         if status != 0:
@@ -89,7 +87,7 @@ class SimpleQuantRegressionServerApplication(object):
         """
         client request strategy customize parameters
         """
-        print('client request strategy customize parameter.')
+        logger.info('client request strategy customize parameter.')
         stretegyName = msg['strategyName']
         status, parametersList = self.strategyManager.getStretegyCustomizeParameters(stretegyName)
         if status != 0:
@@ -98,15 +96,17 @@ class SimpleQuantRegressionServerApplication(object):
             respMsg = ['getStretegyCustomizeParametersCfm', parametersList]
 
         await self.server.send(respMsg)
-        print('send out getStretegyCustomizeParameters response.')
+        logger.info('send out getStretegyCustomizeParameters response.')
 
     async def getObjectDataReq(self, msg):
         """
         client request object data
         """
+        logger.info('client request object Data.')
+
         objectName = msg['object']
         duration = msg['duration']
-        print('Request object {objectName} data.'.format(objectName=objectName))
+        logger.info('Request object {objectName} data.'.format(objectName=objectName))
         status, fetchedData = await self.dataManager.getObjectData(objectName, duration)
 
         if status != 0:
@@ -121,7 +121,7 @@ class SimpleQuantRegressionServerApplication(object):
         """
         client request start regression
         """
-        print('client request regression test')
+        logger.info('client request regression test')
         transitionJson = msg['transition']
         transitionDict = json.loads(transitionJson)
 
@@ -130,7 +130,7 @@ class SimpleQuantRegressionServerApplication(object):
 
         loop = asyncio.get_event_loop()
         task = loop.run_in_executor(self.executor, transition)
-        print('waiting for executor task')
+        logger.info('waiting for executor task')
 
         objectData, report = await asyncio.wait_for(task, 60.0)
 
@@ -151,14 +151,14 @@ class SimpleQuantRegressionServerApplication(object):
         """
         client check server alive or not
         """
-        print('client heart beat ')
+        logger.info('client heart beat ')
         #reply heartBeatAck
 
     async def disconnectReq(self, msg):
         """
         client want close connection
         """
-        print('client close the connection')
+        logger.info('client close the connection')
         #
 
     async def prepareTransition(self, transition):
@@ -170,7 +170,7 @@ class SimpleQuantRegressionServerApplication(object):
             df = df.sort_values('date', ascending=True).reset_index(drop=True)
             transition.setTransitionObjectData(df)
         else:
-            print('prepare transition failed')
+            logger.info('prepare transition failed')
             return
 
 
@@ -179,7 +179,7 @@ class SimpleQuantRegressionServer(object):
         
     """
     def __init__(self):
-        print('init')
+        logger.info('init simpleQuant regression server.')
 
 
     def start(self):

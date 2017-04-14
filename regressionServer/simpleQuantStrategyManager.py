@@ -10,9 +10,10 @@ import pkgutil
 import inspect
 import strategy
 from simpleQuantStrategy import SimpleQuantStrategyBase
-import logging
+from common.simpleQuantLogger import SimpleQuantLogger
 
-MyLogger = logging.getLogger(__name__)
+logger = SimpleQuantLogger(__name__, '127.0.0.1:4321')
+
 class SimpleQuantStrategyManager:
     def __init__(self):
         self.strategy_name_list = [modname for importer, modname, ispkg in pkgutil.iter_modules(strategy.__path__)]
@@ -24,7 +25,7 @@ class SimpleQuantStrategyManager:
             for name, obj in inspect.getmembers(m, inspect.isclass):
                 if issubclass(obj, SimpleQuantStrategyBase) and (obj != SimpleQuantStrategyBase):
                     return obj
-        print('No strategy was found with name:{strategyName}'.format(strategyName=strategyName))
+        logger.info('No strategy was found with name:{strategyName}'.format(strategyName=strategyName))
 
     def getStrategyNameList(self):
         return self.strategy_name_list
@@ -41,11 +42,9 @@ class SimpleQuantStrategyManager:
             return -1, []
 
     def getStrategySourceCode(self, strategyName):
-        print('SimpleQuantStrategyManager:getStrategySourceCode() strategyName:{strategyName}'.format(strategyName=strategyName))
+        logger.info('SimpleQuantStrategyManager:getStrategySourceCode() strategyName:{strategyName}'.format(strategyName=strategyName))
         if strategyName in self.strategy_name_list:
             fileName = "strategy/" + strategyName + '.py'
-            print(fileName)
-            print(strategy.__path__)
             with open(fileName, 'r') as f:
                 read_data = f.read()
             f.close()

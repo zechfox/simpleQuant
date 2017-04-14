@@ -11,6 +11,7 @@ from trafaret_config import commandline
 
 from .routes import setup_routes
 from common.simpleQuantZmqProcess import SimpleQuantZmqRequestReplyProcess
+from common.simpleQuantLogger import SimpleQuantLoggerServer
 
 primitive_ip_regexp = r'^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$'
 
@@ -54,7 +55,8 @@ async def init_regression(app):
     await regressionClient.send(msg)
     msgName, data = await regressionClient.recv()
 
-
+async def logHandler(message):
+    print(message)
 
 async def close_pg(app):
     app['db'].close()
@@ -75,7 +77,13 @@ def init(argv):
     config = commandline.config_from_options(options, TRAFARET)
 
     #
-    #regression server
+    # log server
+    #
+    logServer = SimpleQuantLoggerServer('127.0.0.1:4321', logHandler)
+    logServer.run()
+
+    #
+    # regression server
     #
     regressionServerConfig = config['regressionServer']
     regressionServerAddr = regressionServerConfig['addr']
@@ -92,6 +100,9 @@ def init(argv):
 
     #regression client
     app['regressionClient'] = regressionClient
+
+    #log server
+    app['logServer'] = logServer 
 
     # create connection to the database
     app.on_startup.append(init_pg)

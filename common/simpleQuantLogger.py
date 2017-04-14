@@ -4,78 +4,83 @@ Created on Fri Dec  4 22:32:01 2015
 
 @author: zech
 """
+import asyncio
+import zmq.asyncio
+import zmq
 import pickle
 import logging
 import logging.handlers
 import socketserver
 import struct
+import sys
+
+from zmq.log.handlers import PUBHandler
+
+class SimpleQuantLogger(logging.Logger):
+    def __init__(self, topic, loggerServerAddr):
+        super().__init__(topic)
+        self.name = topic
+
+        if isinstance(loggerServerAddr, str):
+            addr = loggerServerAddr.split(':')
+            host, port = addr if len(addr) == 2 else (addr[0], None)
+        self.loggerServerHost = host
+        self.loggerServerPort = port
+
+        context = zmq.asyncio.Context()
+        publisher = context.socket(zmq.PUB)
+        publisher.connect('tcp://%s:%s' %(self.loggerServerHost, self.loggerServerPort))
+        handler = PUBHandler(publisher)
+        handler.root_topic = topic
+        self.addHandler(handler)
+        logging.basicConfig(
+            level=logging.INFO,
+            format='PID %(process)5s %(name)18s: %(message)s',
+            stream=sys.stderr,
+        )
 
 
-class LogRecordStreamHandler(socketserver.StreamRequestHandler):
-    """Handler for a streaming logging request.
 
-    This basically logs the record using whatever logging policy is
-    configured locally.
-    """
+class SimpleQuantLoggerServer():
+    def __init__(self, addr, logHandler, topicFilter=b""):
 
-    def handle(self):
-        """
-        Handle multiple requests - each expected to be a 4-byte length,
-        followed by the LogRecord in pickle format. Logs the record
-        according to whatever policy is configured locally.
-        """
-        while True:
-            chunk = self.connection.recv(4)
-            if len(chunk) < 4:
-                break
-            slen = struct.unpack('>L', chunk)[0]
-            chunk = self.connection.recv(slen)
-            while len(chunk) < slen:
-                chunk = chunk + self.connection.recv(slen - len(chunk))
-            obj = self.unPickle(chunk)
-            chunk.clear()
-            record = logging.makeLogRecord(obj)
-            self.handleLogRecord(record)
+        self.logHandler = logHandler 
 
-    def unPickle(self, data):
-        return pickle.loads(data)
+        if isinstance(addr, str):
+           addr = addr.split(':')
+           host, port = addr if len(addr) == 2 else (addr[0], None)
 
-    def handleLogRecord(self, record):
-        # if a name is specified, we use the named logger rather than the one
-        # implied by the record.
-        if self.server.logname is not None:
-            name = self.server.logname
+        self.host = host
+        self.port = port
+
+        self.context = zmq.asyncio.Context()
+        loop = asyncio.get_event_loop()
+        if isinstance(loop, zmq.asyncio.ZMQEventLoop):
+            self.loop = loop
         else:
-            name = record.name
-        logger = logging.getLogger(name)
-        # N.B. EVERY record gets logged. This is because Logger.handle
-        # is normally called AFTER logger-level filtering. If you want
-        # to do filtering, do it at the client end to save wasting
-        # cycles and network bandwidth!
-        logger.handle(record)
+            self.loop = zmq.asyncio.ZMQEventLoop()
+            asyncio.set_event_loop(self.loop)
 
-class LoggingReceiver(socketserver.ThreadingTCPServer):
-    """
-    Simple TCP socket-based logging receiver suitable for testing.
-    """
+        self.subscriber = self.context.socket(zmq.SUB)
+        self.subscriber.bind('tcp://%s:%s' % (self.host, self.port))
+        self.subscriber.setsockopt(zmq.SUBSCRIBE, topicFilter)
 
-    allow_reuse_address = True
 
-    def __init__(self, host='localhost',
-                 port=logging.handlers.DEFAULT_TCP_LOGGING_PORT,
-                 handler=LogRecordStreamHandler):
-        socketserver.ThreadingTCPServer.__init__(self, (host, port), handler)
-        self.abort = 0
-        self.timeout = 1
-        self.logname = None
+    def run(self):
+        self.loop.create_task(self.handleLog())
+        #self.loop.run_forever()
 
-    def serve_until_stopped(self):
-        import select
-        abort = 0
-        while not abort:
-            rd, wr, ex = select.select([self.socket.fileno()],
-                                       [], [],
-                                       self.timeout)
-            if rd:
-                self.handle_request()
-            abort = self.abort
+    async def handleLog(self):
+        while True:
+            level, message = await self.subscriber.recv_multipart()
+            level = level.decode('ascii')
+            message = message.decode('ascii')
+            if message.endswith('\n'):
+                # trim trailing newline, which will get appended again
+                message = message[:-1]
+            if asyncio.iscoroutinefunction(self.logHandler):
+                await self.logHandler(level + ': ' + message)
+            else:
+                self.logHandler(level + ': ' + message)
+
+

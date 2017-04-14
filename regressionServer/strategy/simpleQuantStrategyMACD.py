@@ -4,10 +4,11 @@ Created on Mon Nov  9 17:37:05 2015
 
 @author: zech
 """
-
+from common.simpleQuantLogger import SimpleQuantLogger
 from simpleQuantConstants import *
 from simpleQuantDecision import SimpleQuantDecision
 from simpleQuantStrategy import SimpleQuantStrategyBase
+
 
 customizeParameterList = [{'name': 'DEA', 'value': ''},\
                           {'name': 'DIF', 'value': ''},\

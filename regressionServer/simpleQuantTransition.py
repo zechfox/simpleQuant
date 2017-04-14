@@ -7,6 +7,9 @@ from simpleQuantConstants import *
 from simpleQuantStrategyManager import SimpleQuantStrategyManager
 from simpleQuantEvaluator import SimpleQuantEvaluator
 
+from common.simpleQuantLogger import SimpleQuantLogger
+
+
 class SimpleQuantTransition:
     def __init__(self, jsonString):
         self.name = jsonString['name']
@@ -29,8 +32,9 @@ class SimpleQuantTransition:
 
 
     def __call__(self):
-        log = logging.getLogger('SimpleQuantTransition')
-        log.info('{name} is running {strategyName}'.format(name=self.name, strategyName=self.strategyName))
+        logger = logging.getLogger('Transition')#SimpleQuantLogger(__name__, '127.0.0.1:4321')
+        #logger = SimpleQuantLogger(__name__, '127.0.0.1:4321')
+        logger.info('{name} is running {strategyName}'.format(name=self.name, strategyName=self.strategyName))
         self.runStrategy()
 
         evaluator = SimpleQuantEvaluator()

@@ -5,10 +5,11 @@ Created on Mon Nov  9 17:37:05 2015
 @author: zech
 """
 
-
+from common.simpleQuantLogger import SimpleQuantLogger
 from simpleQuantConstants import *
 from simpleQuantDecision import SimpleQuantDecision
 from simpleQuantStrategy import SimpleQuantStrategyBase
+
 
 class SimpleQuantStrategyFirstOne(SimpleQuantStrategyBase):
     def __init__(self):
@@ -32,6 +33,7 @@ class SimpleQuantStrategyFirstOne(SimpleQuantStrategyBase):
     """
 
     def loop(self, currentObjectData, decisionList):
+
         close = currentObjectData.close
         decision = SimpleQuantDecision()
         if close < 12.30:

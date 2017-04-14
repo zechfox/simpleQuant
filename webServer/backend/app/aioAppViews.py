@@ -5,9 +5,11 @@ import datetime
 import pandas as pd
 
 from .transitionDb import TransitionDb
+from common.simpleQuantLogger import SimpleQuantLogger
 
 from aiohttp import web
 
+myLogger = SimpleQuantLogger(__name__, '127.0.0.1:4321')
 
 async def index(request):
     return web.HTTPFound('/index.html')
@@ -36,7 +38,7 @@ async def transitions(request):
                 if msgName == 'getStretegyCustomizeParametersCfm':
                     parameters = json.dumps(payload)
                 else:
-                    print('received getStretegyCustomizeParametersRej')
+                    myLogger.info('received getStretegyCustomizeParametersRej')
                 newTransition.setCustomizeParameter(parameters)
             async with request.app['db'].acquire() as conn:
                 await newTransition.insertDb(conn)
@@ -44,7 +46,7 @@ async def transitions(request):
                 respData = transitionDict
                 respStatus = 201
         else:
-            print('transition name already exist')
+            myLogger.info('transition name already exist')
             respData = 'Transition Name already exist!'
             respStatus = 409
 
@@ -63,13 +65,13 @@ async def transitions(request):
     return web.json_response(respData, status=respStatus, dumps=json.dumps)
 
 async def getStrategies(request):
-    print('recieve getStrategyListReq')
+    myLogger.info('recieve getStrategyListReq')
     respData = []
     respStatus = 200
     getStrategyListReq = ['getStrategyListReq', 1]
     await request.app['regressionClient'].send(getStrategyListReq)
     getStrategyListCfm =  await request.app['regressionClient'].recv()
-    print('recieve getStrategyListCfm')
+    myLogger.info('recieve getStrategyListCfm')
     msgName = getStrategyListCfm[0]
     strategyList = getStrategyListCfm[1]
     if msgName == 'getStrategyListCfm':
@@ -115,7 +117,7 @@ async def getTransitionData(request):
             msgName = respMsg[0]
             payload = respMsg[1]
             if msgName == 'getObjectDataCfm':
-                print('receive getObjectDataCfm')
+                myLogger.info('receive getObjectDataCfm')
                 df = pd.read_json(payload)
                 df.sort_index(inplace=True, ascending=True)
                 dataSets = [{'data':(df['close'].values.tolist()), 'label':'close'}]
@@ -126,12 +128,12 @@ async def getTransitionData(request):
                 respData = {'objectName':transition.object, 'dataSets':dataSets, 'labels':labels, 'results': results, 'evaluateReport':report}
                 respStatus = 200
             elif msgName == 'getObjectDataRej':
-                print('receive getObjectDataRej with status:{status}, message:{message}.'.format(status=payload['status'], message=payload['msg']))
+                myLogger.info('receive getObjectDataRej with status:{status}, message:{message}.'.format(status=payload['status'], message=payload['msg']))
                
                 respData = payload
                 respStatus = 404 
             else:
-                print('received unexpect message:{msgName}'.format(msgName=msgName))
+                myLogger.info('received unexpect message:{msgName}'.format(msgName=msgName))
         elif data == 'results':
             startRegressionReq = ['startRegressionReq', { 'transition':transition.toJSON() }]
             await regressionClient.send(startRegressionReq)
@@ -142,7 +144,7 @@ async def getTransitionData(request):
             report = json.loads(payload['report'])
             reportList = [{'name':k,'value':v} for (k, v) in report.items()]
             if msgName == 'startRegressionCfm':
-                print('receive startRegressionCfm')
+                myLogger.info('receive startRegressionCfm')
                 df = pd.read_json(objectData)
                 df.sort_index(inplace=True, ascending=True)
                 results = [{'data':(df['marketValue'].values.tolist()), 'label':'Market Value'}]
@@ -154,7 +156,7 @@ async def getTransitionData(request):
                 respData = {'objectName':transition.object, 'dataSets':dataSets, 'labels':labels, 'results': results, 'evaluateReport': reportList}
                 respStatus = 200
             elif msgName == 'startRegressionRej':
-                print('receive startRegressionRej with status:{status}, message:{message}.'.format(status=payload['status'], message=payload['msg']))
+                myLogger.info('receive startRegressionRej with status:{status}, message:{message}.'.format(status=payload['status'], message=payload['msg']))
                
                 respData = payload
                 respStatus = 404 
@@ -192,10 +194,10 @@ async def updateTransition(request):
               if msgName == 'getStretegyCustomizeParametersCfm':
                   parameters = json.dumps(payload)
               else:
-                  print('received getStretegyCustomizeParametersRej')
+                  myLogger.info('received getStretegyCustomizeParametersRej')
 
-              print(type(parameters))
-              print(parameters)
+              myLogger.info(type(parameters))
+              myLogger.info(parameters)
               transition.setCustomizeParameter(parameters)
 
           async with request.app['db'].acquire() as conn:
