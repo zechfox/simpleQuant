@@ -17,7 +17,7 @@ import sys
 from zmq.log.handlers import PUBHandler
 
 class SimpleQuantLogger(logging.Logger):
-    def __init__(self, topic, loggerServerAddr):
+    def __init__(self, topic, loggerServerAddr, newLoop=False):
         super().__init__(topic)
         self.name = topic
 
@@ -28,6 +28,12 @@ class SimpleQuantLogger(logging.Logger):
         self.loggerServerPort = port
 
         context = zmq.asyncio.Context()
+
+        # a new loop
+        if newLoop:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
         publisher = context.socket(zmq.PUB)
         publisher.connect('tcp://%s:%s' %(self.loggerServerHost, self.loggerServerPort))
         handler = PUBHandler(publisher)

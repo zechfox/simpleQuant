@@ -32,8 +32,9 @@ class SimpleQuantTransition:
 
 
     def __call__(self):
-        logger = logging.getLogger('Transition')#SimpleQuantLogger(__name__, '127.0.0.1:4321')
-        #logger = SimpleQuantLogger(__name__, '127.0.0.1:4321')
+        # a new loop is needed, when another asyncio
+        # event loop in a different thread or sub-process created from main thread/process,
+        logger = SimpleQuantLogger(__name__, '127.0.0.1:4321', True)
         logger.info('{name} is running {strategyName}'.format(name=self.name, strategyName=self.strategyName))
         self.runStrategy()
 
