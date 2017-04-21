@@ -39,12 +39,6 @@ class SimpleQuantLogger(logging.Logger):
         handler = PUBHandler(publisher)
         handler.root_topic = topic
         self.addHandler(handler)
-        logging.basicConfig(
-            level=logging.INFO,
-            format='PID %(process)5s %(name)18s: %(message)s',
-            stream=sys.stderr,
-        )
-
 
 
 class SimpleQuantLoggerServer():
