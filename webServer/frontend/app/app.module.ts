@@ -11,6 +11,8 @@ import { AppRoutingModule }     from './app-routing.module';
 import { DynamicFormComponent }         from './dynamic-form.component';
 import { DynamicFormQuestionComponent } from './dynamic-form-question.component';
 import { LineChartComponent } from './line-chart';
+import { LogComponent } from './log.component';
+import { LogService } from './log.service'; 
 import { QuestionService } from './question.service';
 import { StrategyDetailComponent } from './strategy-detail.component';
 import { StrategiesComponent }     from './strategies.component';
@@ -18,6 +20,7 @@ import { StrategyService }         from './strategy.service';
 import { TransitionDetailComponent } from './transition-detail.component';
 import { TransitionsComponent } from './transitions.component';
 import { TransitionService } from './transition.service';
+import { WebSocketService } from './websocket.service';
 
 
 
@@ -38,6 +41,7 @@ import { TransitionService } from './transition.service';
       AppComponent,
       DynamicFormComponent,
       DynamicFormQuestionComponent,
+      LogComponent,
       TransitionDetailComponent,
       StrategyDetailComponent,
       StrategiesComponent,
@@ -45,10 +49,12 @@ import { TransitionService } from './transition.service';
       TransitionsComponent
   ],
   providers: [
+      LogService,
       QuestionService,
       StrategyService,
       TransitionService,
-      QuestionService
+      QuestionService,
+      WebSocketService
   ],
   bootstrap: [ AppComponent ]
 })

@@ -7,6 +7,7 @@ import { Component } from '@angular/core';
     <nav>
       <a routerLink="/transitions" routerLinkActive="active">Transitions</a>
       <a routerLink="/strategies" routerLinkActive="active">Strategies</a>
+      <a routerLink="/log" routerLinkActive="active">Log</a>
     </nav>
     <router-outlet></router-outlet>
   `,
@@ -14,6 +15,6 @@ import { Component } from '@angular/core';
 })
 
 export class AppComponent {
-  title = 'Tour of Quant';
+  title = 'SimpleQuant';
 }
 

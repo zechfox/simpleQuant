@@ -84,9 +84,4 @@ class SimpleQuantLoggerServer():
             if message.endswith('\n'):
                 # trim trailing newline, which will get appended again
                 message = message[:-1]
-            if asyncio.iscoroutinefunction(self.logHandler):
                 await self.logHandler(level + ': ' + message)
-            else:
-                self.logHandler(level + ': ' + message)
-
-

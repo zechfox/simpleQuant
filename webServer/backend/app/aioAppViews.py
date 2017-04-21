@@ -1,3 +1,4 @@
+import aiohttp
 import json
 import os
 import datetime
@@ -206,4 +207,22 @@ async def updateTransition(request):
           respStatus = 200
 
    return web.json_response(respData, status=respStatus)
+
+async def websocketHandler(request):
+    ws = web.WebSocketResponse()
+    await ws.prepare(request)
+
+    async for msg in ws:
+        if msg.type == aiohttp.WSMsgType.TEXT:
+            wsData = json.loads(msg.data)
+            id = wsData['id']
+            message = wsData['message']
+            if message == 'disconnect':
+                await ws.close(code=1001, message='Server shutdown')
+                del request.app['websockets'][id]
+                return ws
+            elif message == 'connect':
+                request.app['websockets'][id] = ws
+
+
 

@@ -7,6 +7,7 @@ import trafaret as T
 import zmq
 
 from aiohttp import web
+from functools import partialmethod
 from trafaret_config import commandline
 
 from .routes import setup_routes
@@ -49,14 +50,45 @@ async def init_pg(app):
     app['db'] = engine
 
 async def init_regression(app):
+    #
+    # regression server
+    #
+    config = app['config']
+    regressionServerConfig = config['regressionServer']
+    regressionServerAddr = regressionServerConfig['addr']
+    regressionServerPort = regressionServerConfig['port']
+    serverAddr = regressionServerAddr + ':' + str(regressionServerPort)
+    regressionClient = SimpleQuantZmqRequestReplyProcess(False, serverAddr)
+    regressionClient.run()
+
     msg = ['connectionReq', {'name':'zechfox'}]
 
-    regressionClient = app['regressionClient']
     await regressionClient.send(msg)
     msgName, data = await regressionClient.recv()
 
-async def logHandler(message):
-    print(message)
+    app['regressionClient'] = regressionClient
+
+class wsLogDistributor():
+    def __init__(self, aiohttpApp):
+        self.app = aiohttpApp
+    
+    async def __call__(self, message):
+        if self.app['websockets'][0] is not None:
+            debugWs = self.app['websockets'][0]
+            wsMessage = {'id':0, 'message':message}
+            await debugWs.send_json(wsMessage)
+
+
+def init_log_server(app):
+    #
+    # log server
+    #
+    logHandler = wsLogDistributor(app)
+    logServer = SimpleQuantLoggerServer('127.0.0.1:4321', logHandler)
+    logServer.run()
+
+    app['logServer'] = logServer 
+
 
 async def close_pg(app):
     app['db'].close()
@@ -76,39 +108,30 @@ def init(argv):
 
     config = commandline.config_from_options(options, TRAFARET)
 
-    #
-    # log server
-    #
-    logServer = SimpleQuantLoggerServer('127.0.0.1:4321', logHandler)
-    logServer.run()
-
-    #
-    # regression server
-    #
-    regressionServerConfig = config['regressionServer']
-    regressionServerAddr = regressionServerConfig['addr']
-    regressionServerPort = regressionServerConfig['port']
-    serverAddr = regressionServerAddr + ':' + str(regressionServerPort)
-    regressionClient = SimpleQuantZmqRequestReplyProcess(False, serverAddr)
-    regressionClient.run()
     # setup application and extensions
     loop = asyncio.get_event_loop()
+    if isinstance(loop, zmq.asyncio.ZMQEventLoop):
+        loop = loop
+    else:
+        loop = zmq.asyncio.ZMQEventLoop()
+        asyncio.set_event_loop(loop)
+
     app = web.Application(loop=loop)
 
     # load config from yaml file in current dir
     app['config'] = config
 
-    #regression client
-    app['regressionClient'] = regressionClient
 
-    #log server
-    app['logServer'] = logServer 
+    # websockets
+    app['websockets'] = [None]
 
     # create connection to the database
     app.on_startup.append(init_pg)
     # shutdown db connection on exit
     app.on_cleanup.append(close_pg)
 
+    # create log server
+    app.on_startup.append(init_log_server)
     # create connection to regression server
     app.on_startup.append(init_regression)
     # setup views and routes

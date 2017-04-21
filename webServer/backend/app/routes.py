@@ -1,5 +1,5 @@
 import os, sys, inspect
-from .aioAppViews import index, transitions, getStrategies, getStrategyData, getTransitionData, updateTransition
+from .aioAppViews import index, transitions, getStrategies, getStrategyData, getTransitionData, updateTransition, websocketHandler
 static_folder_root = os.path.join(os.path.abspath(os.path.join(__file__, '../../../')), "frontend")
 
 def setup_routes(app):
@@ -7,6 +7,7 @@ def setup_routes(app):
     app.router.add_get('/transitions', transitions)
     app.router.add_post('/transitions', transitions)
     app.router.add_get('/strategies', getStrategies)
+    app.router.add_get('/logServer', websocketHandler)
     resource = app.router.add_resource('/strategy/detail/{name}/{data}')
     resource.add_route('GET', getStrategyData)
     resource = app.router.add_resource('/transition/detail/{transitionId:\d+}/{data}')
