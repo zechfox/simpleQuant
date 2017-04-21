@@ -24,12 +24,6 @@ class SimpleQuantTransition:
         self.positionHistory = []
         self.marketValue = []
 
-        logging.basicConfig(
-            level=logging.INFO,
-            format='PID %(process)5s %(name)18s: %(message)s',
-            stream=sys.stderr,
-        )
-
 
     def __call__(self):
         # a new loop is needed, when another asyncio
@@ -41,6 +35,7 @@ class SimpleQuantTransition:
         evaluator = SimpleQuantEvaluator()
         evaluator.performEvaluate(self)
         report = evaluator.getReport()
+        logger.info('{name} is running {strategyName}....Done'.format(name=self.name, strategyName=self.strategyName))
 
         return self.objectData.to_json(), json.dumps(report)
 
