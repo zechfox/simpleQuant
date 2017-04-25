@@ -27,10 +27,8 @@ class SimpleQuantTransition:
 
 
     def __call__(self):
-        # a new loop is needed, when another asyncio
-        # event loop in a different thread or sub-process created from main thread/process,
         # use transition id as topic
-        logger = SimpleQuantLogger(self.id, '127.0.0.1:4321', True)
+        logger = SimpleQuantLogger(self.id, '127.0.0.1:4321')
         logger.info('{name} is running {strategyName}'.format(name=self.name, strategyName=self.strategyName))
         self.runStrategy()
 
