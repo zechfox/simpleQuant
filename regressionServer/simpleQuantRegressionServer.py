@@ -13,8 +13,8 @@ from simpleQuantStrategyManager import SimpleQuantStrategyManager
 from simpleQuantDataManager import SimpleQuantDataManager
 from simpleQuantTransition import SimpleQuantTransition
 
-
-logger = SimpleQuantLogger(__name__, '127.0.0.1:4321')
+# 0 topic means system/framework log
+logger = SimpleQuantLogger(0, '127.0.0.1:4321')
 
 class SimpleQuantRegressionServerApplication(object):
     """ regression server application

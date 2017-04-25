@@ -10,7 +10,8 @@ from common.simpleQuantLogger import SimpleQuantLogger
 
 from aiohttp import web
 
-myLogger = SimpleQuantLogger(__name__, '127.0.0.1:4321')
+# 0 topic means system/framework level log
+myLogger = SimpleQuantLogger(0, '127.0.0.1:4321')
 
 async def index(request):
     return web.HTTPFound('/index.html')

@@ -12,7 +12,8 @@ import strategy
 from simpleQuantStrategy import SimpleQuantStrategyBase
 from common.simpleQuantLogger import SimpleQuantLogger
 
-logger = SimpleQuantLogger(__name__, '127.0.0.1:4321')
+# 0 topic means system/framework log
+logger = SimpleQuantLogger(0, '127.0.0.1:4321')
 
 class SimpleQuantStrategyManager:
     def __init__(self):
