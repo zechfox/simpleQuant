@@ -72,10 +72,11 @@ class wsLogDistributor():
     def __init__(self, aiohttpApp):
         self.app = aiohttpApp
     
-    async def __call__(self, message):
+    async def __call__(self, topic, message):
+        # topic 0 will receive all topic
         if self.app['websockets'][0] is not None:
             debugWs = self.app['websockets'][0]
-            wsMessage = {'id':0, 'message':message}
+            wsMessage = {'id':topic, 'message':message}
             await debugWs.send_json(wsMessage)
 
 
