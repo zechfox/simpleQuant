@@ -10,8 +10,8 @@ from common.simpleQuantLogger import SimpleQuantLogger
 
 from aiohttp import web
 
-# 0 topic means system/framework level log
-myLogger = SimpleQuantLogger(0, '127.0.0.1:4321')
+# Debug topic means system/framework level log
+myLogger = SimpleQuantLogger('Debug', '127.0.0.1:4321')
 
 async def index(request):
     return web.HTTPFound('/index.html')
@@ -216,14 +216,14 @@ async def websocketHandler(request):
     async for msg in ws:
         if msg.type == aiohttp.WSMsgType.TEXT:
             wsData = json.loads(msg.data)
-            id = wsData['id']
+            name = wsData['name']
             message = wsData['message']
             if message == 'disconnect':
                 await ws.close(code=1001, message='Server shutdown')
-                del request.app['websockets'][id]
+                del request.app['websockets'][name]
                 return ws
             elif message == 'connect':
-                request.app['websockets'][id] = ws
+                request.app['websockets'][name] = ws
 
 
 

@@ -17,6 +17,7 @@ import { QuestionService } from './question.service';
 import { StrategyDetailComponent } from './strategy-detail.component';
 import { StrategiesComponent }     from './strategies.component';
 import { StrategyService }         from './strategy.service';
+import { TabsModule } from 'ng2-bootstrap/tabs';
 import { TransitionDetailComponent } from './transition-detail.component';
 import { TransitionsComponent } from './transitions.component';
 import { TransitionService } from './transition.service';
@@ -33,6 +34,7 @@ import { WebSocketService } from './websocket.service';
       ButtonsModule.forRoot(),
       ModalModule.forRoot(),
       PopoverModule.forRoot(),
+      TabsModule.forRoot(),
       CodemirrorModule,
       ChartsModule,
       ReactiveFormsModule

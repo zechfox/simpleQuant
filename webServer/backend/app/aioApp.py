@@ -73,11 +73,18 @@ class wsLogDistributor():
         self.app = aiohttpApp
     
     async def __call__(self, topic, message):
-        # topic 0 will receive all topic
-        if self.app['websockets'][0] is not None:
-            debugWs = self.app['websockets'][0]
-            wsMessage = {'id':topic, 'message':message}
-            await debugWs.send_json(wsMessage)
+        # topic Debug will receive all topic message
+        if topic in self.app['websockets'] and self.app['websockets'][topic] is not None:
+            logWs = self.app['websockets'][topic]
+            wsMessage = {'name':topic, 'message':message}
+            await logWs.send_json(wsMessage)
+
+        if topic != 'Debug':
+            if 'Debug' in self.app['websockets'] and self.app['websockets']['Debug'] is not None:
+                debugWs = self.app['websockets']['Debug']
+                debugMessage = {'name':topic, 'message':message}
+                await debugWs.send_json(debugMessage)
+
 
 
 def init_log_server(app):
@@ -124,7 +131,7 @@ def init(argv):
 
 
     # websockets
-    app['websockets'] = [None]
+    app['websockets'] = {'Debug':None}
 
     # create connection to the database
     app.on_startup.append(init_pg)

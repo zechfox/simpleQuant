@@ -4,6 +4,7 @@ import { ActivatedRoute, Params }   from '@angular/router';
 import { Location }                 from '@angular/common';
 
 import { DropdownQuestion } from './question-dropdown';
+import { LogComponent } from './log.component';
 import { Parameter } from './parameter';
 import { QuestionBase }     from './question-base';
 import { QuestionService } from './question.service';
@@ -24,6 +25,7 @@ import 'rxjs/add/operator/switchMap';
 
 export class TransitionDetailComponent implements OnInit {
   @ViewChild(BaseChartDirective) chart: BaseChartDirective;
+  @ViewChild(LogComponent) logClient: LogComponent;
   transition: Transition;
   transitionData: TransitionData;
   dataSets: Array<any> = [{'data':[0,0,0,0,0,0,0,0,0,0,0,0,0,0], 'label':'close'}];
@@ -41,7 +43,7 @@ export class TransitionDetailComponent implements OnInit {
     private questionService: QuestionService,
     private route: ActivatedRoute,
     private location: Location
-  ) {}
+    ) {}
 
   ngOnInit(): void {
     this.route.params
@@ -88,6 +90,7 @@ export class TransitionDetailComponent implements OnInit {
     {
       this.onUpdate();
     }
+    this.logClient.connect();
     this.transitionService.getTransitionResults(this.transition.id)
            .then(transitionData => this.updateTransitionData(transitionData),
                  error => this.errMsg = <any>error);
@@ -107,6 +110,10 @@ export class TransitionDetailComponent implements OnInit {
                 this.chart.chart.update();
             }
         });
+  }
+
+  onCloseWindows() {
+    this.logClient.disconnect();
   }
 }
 

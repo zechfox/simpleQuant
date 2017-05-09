@@ -13,8 +13,8 @@ from simpleQuantStrategyManager import SimpleQuantStrategyManager
 from simpleQuantDataManager import SimpleQuantDataManager
 from simpleQuantTransition import SimpleQuantTransition
 
-# 0 topic means system/framework log
-logger = SimpleQuantLogger(0, '127.0.0.1:4321')
+# Debug topic means system/framework log
+logger = SimpleQuantLogger('Debug', '127.0.0.1:4321')
 
 class SimpleQuantRegressionServerApplication(object):
     """ regression server application
@@ -58,7 +58,7 @@ class SimpleQuantRegressionServerApplication(object):
         logger.info('client request strategy list.')
         id = 11
         strategyList = [{'name':strategyName, 'id':id} for id, strategyName in enumerate(self.strategyManager.getStrategyNameList())]
-        logger.info(strategyList)
+        logger.info("strategy list is {strategyList}".format(strategyList=strategyList))
 
         #get all strategy, make a list of them
         getStrategyListCfm = ['getStrategyListCfm', strategyList]

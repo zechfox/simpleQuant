@@ -61,12 +61,11 @@ class SimpleQuantLogPublisher(logging.Handler):
             self.handleError(record)
             return
         
-
-        if isinstance(topic, int):
-            # only use 1 byte for now, maybe extend later
-            btopic = topic.to_bytes(1, byteorder='big')
+        if isinstance(topic, str):
+            btopic = cast_bytes(topic)
         else:
-            btopic = b'\x00' 
+            print("Exception: topic is not string:{topic}".format(topic=topic))
+            btopic = b'Debug' 
 
         self.socket.send_multipart([btopic, bmsg])
 
@@ -74,6 +73,7 @@ class SimpleQuantLogPublisher(logging.Handler):
 
 class SimpleQuantLogger(logging.Logger):
     def __init__(self, topic, loggerServerAddr):
+
         super().__init__(topic)
         self.name = topic
 
@@ -90,6 +90,20 @@ class SimpleQuantLogger(logging.Logger):
         handler = SimpleQuantLogPublisher(publisher)
         handler.root_topic = topic
         self.addHandler(handler)
+        for name in "debug warn warning error critical fatal info".split():
+            meth = getattr(logging.Logger,name)
+            setattr(SimpleQuantLogger, name, 
+                    lambda self, msg, *args, **kwargs: 
+                        meth(self, topic+TOPIC_DELIM+msg,*args, **kwargs))
+
+    def log(self, level, msg, *args, **kwargs):
+        """Log 'msg % args' with level and topic.
+        To pass exception information, use the keyword argument exc_info
+        with a True value::
+        logger.log(level, "We have a %s", 
+                "mysterious problem", exc_info=1)
+        """
+        logging.Logger.log(self, level, '%s::%s'%(self.name, msg), *args, **kwargs)
 
 
 class SimpleQuantLoggerServer():
@@ -124,7 +138,7 @@ class SimpleQuantLoggerServer():
     async def handleLog(self):
         while True:
             topic, message = await self.subscriber.recv_multipart()
-            topic = int.from_bytes(topic, byteorder='big')
+            topic = topic.decode('ascii')
             message = message.decode('ascii')
             if message.endswith('\n'):
                 # trim trailing newline, which will get appended again

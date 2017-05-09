@@ -5,7 +5,7 @@ import {WebSocketService} from './websocket.service';
 const logServerUrl:string = 'ws://' + window.location.hostname + (window.location.port ? ':' + window.location.port: '') + '/logServer';
 
 export interface LogMessage {
-    id: number;
+    name: string;
     message: string;
 }
 
@@ -20,7 +20,7 @@ export class LogService {
 	.map((response: MessageEvent): LogMessage => {
 	  let data = JSON.parse(response.data);
 	  return {
-	    id: data.id,
+	    name: data.name,
 	    message: data.message,
 	  }
 	});

@@ -18,7 +18,7 @@ import urllib
 from common.simpleQuantLogger import SimpleQuantLogger
 
 # 0 topic means system/framework log
-logger = SimpleQuantLogger(0, '127.0.0.1:4321')
+logger = SimpleQuantLogger('Debug', '127.0.0.1:4321')
 
 
 

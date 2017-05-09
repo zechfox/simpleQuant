@@ -1,4 +1,5 @@
 <div *ngIf="transition">
+  <div (window:beforeunload)="onCloseWindows()"></div>
   <h2>{{transition.name}} details!</h2>
   <div class="container-fluid">
     <div class="col-xs-12 col-md-8">
@@ -6,20 +7,27 @@
       <line-chart [lineChartData]="results" [lineChartLabels]='labels'></line-chart>
     </div>
     <div class="col-xs-6 col-md-4">
+      <tabset>
+      <tab heading="Configurations">
       <div>
         <h3>Transition Configuration</h3>
 	<dynamic-form [questions]="transitionQuestions" (formJson)='onChange($event)' ></dynamic-form>
       </div>
       <h4>Customize Parameters</h4>
-        <div *ngIf="parameterQuestions">
-          <dynamic-form [questions]="parameterQuestions" (formJson)='onParameterChange($event)' ></dynamic-form>
-	</div>
+      <div *ngIf="parameterQuestions">
+        <dynamic-form [questions]="parameterQuestions" (formJson)='onParameterChange($event)' ></dynamic-form>
+      </div>
       <h4>Evaluate Report</h4>
-        <div *ngIf="evaluateReport">
-          <i *ngFor="let indicator of evaluateReport">
-            <h5>{{indicator.name}}:{{indicator.value}}</h5>
-          </i>
-        </div>
+      <div *ngIf="evaluateReport">
+        <i *ngFor="let indicator of evaluateReport">
+          <h5>{{indicator.name}}:{{indicator.value}}</h5>
+        </i>
+      </div>
+      </tab>
+      <tab heading="Log">
+        <log [transitionName]="transition.name"></log>
+      </tab>
+      </tabset> 
       <div class="form-row">
         <button (click)="onUpdate()" [disabled]="!isFormChanged">Update Transition</button>
         <button (click)="onRunTransition()" >Run Transition</button>
